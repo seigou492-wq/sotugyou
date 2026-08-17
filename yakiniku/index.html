@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>焼肉 誠 公式アプリ</title>
+<style>
+:root{
+  --bg:#0f0d0a; --panel:#1a1712; --panel2:#26211a; --line:#3a332a;
+  --gold:#c9a45c; --gold2:#e8cd8f; --text:#f2ece0; --muted:#9a8f7a;
+  --red:#c0392b; --ember:#d35400; --green:#4caf7d;
+}
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif}
+body{background:#080705;color:var(--text);min-height:100vh}
+button{font-family:inherit;cursor:pointer;border:none}
+input,select,textarea{font-family:inherit;font-size:15px;width:100%;padding:10px 12px;border-radius:8px;
+  border:1px solid var(--line);background:var(--panel2);color:var(--text)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold)}
+label{display:block;font-size:12px;color:var(--muted);margin:12px 0 4px}
+a{color:var(--gold2)}
+h1,h2,h3{font-weight:600}
+
+/* ===== 共通部品 ===== */
+.btn{display:inline-block;padding:11px 18px;border-radius:8px;font-size:14px;font-weight:600;
+  background:linear-gradient(135deg,var(--gold),#a9823f);color:#1a1206;letter-spacing:.05em}
+.btn:active{transform:scale(.97)}
+.btn.ghost{background:transparent;border:1px solid var(--gold);color:var(--gold2)}
+.btn.danger{background:transparent;border:1px solid var(--red);color:#e07b6d}
+.btn.small{padding:6px 12px;font-size:12px}
+.btn.block{display:block;width:100%;text-align:center}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+.tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:99px;border:1px solid var(--gold);color:var(--gold2)}
+.tag.red{border-color:var(--red);color:#e07b6d}
+.tag.green{border-color:var(--green);color:#7fd4a8}
+.muted{color:var(--muted);font-size:12px}
+.row{display:flex;gap:10px;align-items:center}
+.row.between{justify-content:space-between}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sec-title{font-size:14px;color:var(--gold2);letter-spacing:.15em;margin:22px 0 10px;display:flex;align-items:center;gap:8px}
+.sec-title::after{content:"";flex:1;height:1px;background:var(--line)}
+
+/* ===== 認証画面 ===== */
+.auth-wrap{max-width:430px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:28px 22px;
+  background:radial-gradient(circle at 50% 0%,#241a10 0%,#080705 60%)}
+.logo{text-align:center;margin-bottom:26px}
+.logo .mark{font-size:44px}
+.logo h1{font-size:26px;letter-spacing:.35em;color:var(--gold2);margin-top:6px}
+.logo p{color:var(--muted);font-size:12px;letter-spacing:.2em;margin-top:4px}
+.auth-tabs{display:flex;border-bottom:1px solid var(--line);margin-bottom:8px}
+.auth-tabs button{flex:1;background:none;color:var(--muted);padding:12px;font-size:14px;border-bottom:2px solid transparent}
+.auth-tabs button.on{color:var(--gold2);border-bottom-color:var(--gold)}
+
+/* ===== お客様アプリ（スマホ枠） ===== */
+.phone{max-width:430px;margin:0 auto;min-height:100vh;background:var(--bg);position:relative;
+  box-shadow:0 0 60px rgba(0,0,0,.8)}
+.app-header{position:sticky;top:0;z-index:20;background:rgba(15,13,10,.95);backdrop-filter:blur(6px);
+  border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;padding:14px 16px}
+.app-header .ttl{font-size:16px;letter-spacing:.25em;color:var(--gold2)}
+.bell{position:relative;background:none;font-size:20px}
+.bell .cnt{position:absolute;top:-6px;right:-8px;background:var(--red);color:#fff;font-size:10px;
+  border-radius:99px;padding:1px 5px;min-width:16px;text-align:center}
+.app-body{padding:16px 16px 90px}
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;z-index:30;
+  display:flex;background:#14110c;border-top:1px solid var(--line)}
+.bottom-nav button{flex:1;background:none;color:var(--muted);padding:9px 0 10px;font-size:10px;display:flex;
+  flex-direction:column;align-items:center;gap:3px}
+.bottom-nav button .ic{font-size:20px}
+.bottom-nav button.on{color:var(--gold2)}
+
+/* ホーム */
+.hero{border-radius:16px;overflow:hidden;border:1px solid var(--gold);margin-bottom:16px;
+  background:linear-gradient(135deg,#3b1d0d 0%,#1c0f07 70%);padding:22px 18px;position:relative}
+.hero .tag{margin-bottom:10px}
+.hero h2{font-size:19px;line-height:1.5;color:var(--gold2)}
+.hero p{font-size:13px;color:var(--text);margin-top:8px;line-height:1.7}
+.menu-scroll{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px}
+.menu-scroll::-webkit-scrollbar{display:none}
+.m-card{min-width:130px;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;flex-shrink:0}
+.m-card .ph{height:80px;display:flex;align-items:center;justify-content:center;font-size:34px;
+  background:linear-gradient(135deg,#33241a,#1c140d)}
+.m-card .bd{padding:8px 10px}
+.m-card .nm{font-size:12px;line-height:1.4}
+.m-card .pr{font-size:13px;color:var(--gold2);margin-top:2px}
+
+/* 店舗 */
+.store-card{overflow:hidden;padding:0}
+.store-card .ph{height:110px;display:flex;align-items:flex-end;padding:12px 16px;font-size:17px;letter-spacing:.1em;
+  color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.7)}
+.store-card .bd{padding:14px 16px}
+.fav-btn{background:none;font-size:22px}
+.info-tbl{width:100%;font-size:13px;border-collapse:collapse}
+.info-tbl th{color:var(--muted);font-weight:400;text-align:left;padding:7px 10px 7px 0;width:82px;vertical-align:top;white-space:nowrap}
+.info-tbl td{padding:7px 0;line-height:1.6}
+.cat-tabs{display:flex;gap:8px;overflow-x:auto;padding:4px 0 10px}
+.cat-tabs::-webkit-scrollbar{display:none}
+.cat-tabs button{white-space:nowrap;background:var(--panel2);color:var(--muted);border:1px solid var(--line);
+  border-radius:99px;padding:7px 14px;font-size:12px}
+.cat-tabs button.on{background:var(--gold);color:#1a1206;border-color:var(--gold);font-weight:600}
+.menu-row{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.menu-row .ph{width:56px;height:56px;border-radius:10px;background:linear-gradient(135deg,#33241a,#1c140d);
+  display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0}
+.menu-row .nm{font-size:14px}
+.menu-row .ds{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.5}
+.menu-row .pr{margin-left:auto;color:var(--gold2);font-size:14px;white-space:nowrap}
+.rank-num{display:inline-block;width:20px;height:20px;border-radius:50%;background:var(--gold);color:#1a1206;
+  font-size:12px;font-weight:700;text-align:center;line-height:20px;margin-right:6px}
+
+/* クーポン */
+.coupon{border:1px dashed var(--gold);border-radius:14px;background:linear-gradient(135deg,#241c10,#171209);
+  padding:16px;margin-bottom:12px;position:relative}
+.coupon.used{opacity:.45;border-color:var(--line)}
+.coupon .bene{font-size:19px;color:var(--gold2);font-weight:700;margin:4px 0}
+.coupon .cond{font-size:11px;color:var(--muted);line-height:1.6}
+.coupon .exp{font-size:11px;color:#e07b6d;margin-top:6px}
+
+/* スタンプ */
+.stamp-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:12px 0}
+.stamp{aspect-ratio:1;border-radius:50%;border:2px dashed var(--line);display:flex;align-items:center;
+  justify-content:center;font-size:22px;color:var(--line)}
+.stamp.on{border:2px solid var(--gold);background:radial-gradient(circle,#3b2c15,#241c10);color:var(--gold2)}
+.point-big{font-size:34px;color:var(--gold2);font-weight:700}
+
+/* リスト */
+.list-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--line);font-size:13px}
+.list-item:last-child{border-bottom:none}
+
+/* ===== モーダル・トースト ===== */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:flex;align-items:center;
+  justify-content:center;padding:20px}
+.modal{background:var(--panel);border:1px solid var(--gold);border-radius:16px;padding:22px;width:100%;
+  max-width:400px;max-height:86vh;overflow-y:auto}
+.modal h3{color:var(--gold2);margin-bottom:12px;font-size:16px}
+#toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--gold);color:#1a1206;
+  padding:11px 22px;border-radius:99px;font-size:13px;font-weight:600;z-index:200;opacity:0;transition:opacity .3s;
+  pointer-events:none;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.5)}
+#toast.show{opacity:1}
+
+/* ===== 管理画面 ===== */
+.admin{display:flex;min-height:100vh;background:var(--bg)}
+.side{width:210px;background:#14110c;border-right:1px solid var(--line);padding:20px 0;flex-shrink:0}
+.side .lg{padding:0 20px 18px;border-bottom:1px solid var(--line);margin-bottom:12px}
+.side .lg b{color:var(--gold2);letter-spacing:.15em;font-size:15px}
+.side .lg div{font-size:11px;color:var(--muted);margin-top:4px}
+.side button{display:block;width:100%;text-align:left;background:none;color:var(--muted);padding:11px 20px;font-size:13px}
+.side button.on{color:var(--gold2);background:var(--panel2);border-right:3px solid var(--gold)}
+.side .lo{margin-top:20px;color:#e07b6d}
+.main{flex:1;padding:26px;max-width:1100px;min-width:0}
+.main h2{color:var(--gold2);letter-spacing:.1em;font-size:19px;margin-bottom:18px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
+.kpi .lb{font-size:11px;color:var(--muted)}
+.kpi .vl{font-size:26px;color:var(--gold2);font-weight:700;margin-top:4px}
+.kpi .vl small{font-size:12px;color:var(--muted);font-weight:400}
+.charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.bar-row{display:flex;align-items:center;gap:8px;margin:7px 0;font-size:12px}
+.bar-row .lb{width:88px;color:var(--muted);text-align:right;flex-shrink:0}
+.bar-row .tr{flex:1;background:var(--panel2);border-radius:4px;height:18px;overflow:hidden}
+.bar-row .br{height:100%;background:linear-gradient(90deg,#a9823f,var(--gold));border-radius:4px;min-width:2px}
+.bar-row .vl{width:38px;color:var(--gold2);flex-shrink:0}
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{text-align:left;color:var(--muted);font-weight:400;font-size:11px;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+.tbl td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+.tbl-wrap{overflow-x:auto}
+@media(max-width:760px){
+  .admin{flex-direction:column}
+  .side{width:100%;display:flex;overflow-x:auto;padding:0;border-right:none;border-bottom:1px solid var(--line);align-items:center}
+  .side .lg{border:none;margin:0;padding:12px 16px;white-space:nowrap}
+  .side .lg div{display:none}
+  .side button{width:auto;white-space:nowrap;padding:14px 12px}
+  .side button.on{border-right:none;border-bottom:2px solid var(--gold)}
+  .main{padding:16px}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast"></div>
+<script>
+"use strict";
+/* =====================================================
+   焼肉 誠 公式アプリ（localStorage プロトタイプ版）
+   お客様アプリ + 管理画面を1ファイルで動作させるSPA
+   ===================================================== */
+const DB_KEY = "yakiniku_makoto_v1";
+let db = null;
+
+/* ---------- 共通ヘルパー ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let _uid = 1000;
+const uid = p => p + "_" + Date.now().toString(36) + (_uid++).toString(36);
+const WD = ["日","月","火","水","木","金","土"];
+function d2s(d){ return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0"); }
+function todayStr(){ return d2s(new Date()); }
+function addDaysStr(base, n){ const d = new Date(base + "T00:00:00"); d.setDate(d.getDate()+n); return d2s(d); }
+function fmtD(s){ if(!s) return "-"; const d = new Date(s + "T00:00:00"); return (d.getMonth()+1) + "/" + d.getDate() + "(" + WD[d.getDay()] + ")"; }
+function daysBetween(a, b){ return Math.round((new Date(b+"T00:00:00") - new Date(a+"T00:00:00")) / 86400000); }
+function yen(n){ return "¥" + Number(n).toLocaleString(); }
+function toast(msg){ const t = $("#toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(t._tm); t._tm = setTimeout(()=>t.classList.remove("show"), 2400); }
+function modal(html){ closeModal(); const bg = document.createElement("div"); bg.className = "modal-bg"; bg.id = "modalBg";
+  bg.innerHTML = `<div class="modal">${html}</div>`;
+  bg.addEventListener("click", e => { if(e.target === bg) closeModal(); });
+  document.body.appendChild(bg); }
+function closeModal(){ const m = $("#modalBg"); if(m) m.remove(); }
+
+/* ---------- 初期データ ---------- */
+function seed(){
+  const today = todayStr();
+  const stores = [
+    { id:"s1", name:"焼肉 誠 本店", emoji:"🏮", color:"linear-gradient(135deg,#7a2c14,#3b1608)",
+      address:"熊本県熊本市中央区下通1-2-3 誠ビル1F", tel:"096-123-4567",
+      hours:"17:00〜23:00（L.O.22:30）／土日祝はランチ営業 11:30〜14:30",
+      closed:"月曜日", parking:"提携コインパーキングあり（1時間無料券進呈）",
+      access:"市電「花畑町」電停より徒歩3分",
+      feature:"落ち着いた完全個室が中心の本店。接待・記念日のご利用に。" },
+    { id:"s2", name:"焼肉 誠 東バイパス店", emoji:"🚗", color:"linear-gradient(135deg,#5b4310,#2a1f06)",
+      address:"熊本県熊本市東区東バイパス沿い 4-5-6", tel:"096-234-5678",
+      hours:"11:30〜15:00／17:00〜23:00",
+      closed:"年中無休", parking:"専用駐車場30台完備",
+      access:"東バイパス「保田窪」交差点すぐ／熊本ICから車で10分",
+      feature:"ファミリー向けの広々とした店舗。キッズスペース・座敷完備。" },
+    { id:"s3", name:"焼肉 誠 八代店", emoji:"⛰️", color:"linear-gradient(135deg,#264a33,#0e2417)",
+      address:"熊本県八代市本町7-8-9", tel:"0965-34-5678",
+      hours:"17:00〜22:30（L.O.22:00）",
+      closed:"水曜日", parking:"専用駐車場15台",
+      access:"JR八代駅より車で5分",
+      feature:"地元密着の八代店。八代産トマトを使ったサイドメニューが人気。" },
+  ];
+  const menus = [
+    { id:"m1",  cat:"黒毛和牛", name:"黒毛和牛特上カルビ", price:1980, desc:"とろける霜降り。当店一番人気", emoji:"🥩", rec:true,  pop:1 },
+    { id:"m2",  cat:"黒毛和牛", name:"黒毛和牛上ロース", price:1780, desc:"きめ細かな赤身の旨み", emoji:"🥩", rec:true,  pop:3 },
+    { id:"m3",  cat:"黒毛和牛", name:"黒毛和牛タン塩", price:1680, desc:"厚切りタンをネギ塩で", emoji:"🥩", rec:false, pop:2 },
+    { id:"m4",  cat:"カルビ",   name:"カルビ", price:880,  desc:"定番の味付けカルビ", emoji:"🍖", rec:false, pop:4 },
+    { id:"m5",  cat:"カルビ",   name:"中落ちカルビ", price:780, desc:"骨のまわりの旨い部分", emoji:"🍖", rec:false, pop:0 },
+    { id:"m6",  cat:"ロース",   name:"ロース", price:920,  desc:"あっさり赤身", emoji:"🥓", rec:false, pop:0 },
+    { id:"m7",  cat:"ハラミ",   name:"上ハラミ", price:1280, desc:"柔らかジューシー", emoji:"🍗", rec:true,  pop:5 },
+    { id:"m8",  cat:"ホルモン", name:"丸腸", price:680, desc:"ぷりぷりの九州名物", emoji:"🌀", rec:false, pop:6 },
+    { id:"m9",  cat:"ホルモン", name:"ミックスホルモン", price:780, desc:"3種盛り合わせ", emoji:"🌀", rec:false, pop:0 },
+    { id:"m10", cat:"海鮮",     name:"海老の塩焼き", price:780, desc:"殻ごと香ばしく", emoji:"🦐", rec:false, pop:0 },
+    { id:"m11", cat:"海鮮",     name:"イカの一夜干し", price:680, desc:"炙ってどうぞ", emoji:"🦑", rec:false, pop:0 },
+    { id:"m12", cat:"サイドメニュー", name:"石焼ビビンバ", price:880, desc:"おこげが香ばしい", emoji:"🍚", rec:false, pop:7 },
+    { id:"m13", cat:"サイドメニュー", name:"冷麺", price:780, desc:"シメの定番", emoji:"🍜", rec:false, pop:8 },
+    { id:"m14", cat:"サイドメニュー", name:"八代トマトの和牛スープ", price:580, desc:"八代店発・全店人気のスープ", emoji:"🍅", rec:false, pop:0 },
+    { id:"m15", cat:"キッズメニュー", name:"お子さまプレート", price:580, desc:"ハンバーグ・唐揚げ・ジュース付", emoji:"🧸", rec:false, pop:0 },
+    { id:"m16", cat:"デザート", name:"自家製杏仁豆腐", price:380, desc:"つるんと後味さっぱり", emoji:"🍮", rec:false, pop:0 },
+    { id:"m17", cat:"デザート", name:"バニラアイス", price:330, desc:"焼肉のあとに", emoji:"🍨", rec:false, pop:0 },
+    { id:"m18", cat:"ドリンク", name:"生ビール", price:580, desc:"キンキンの一杯", emoji:"🍺", rec:false, pop:0 },
+    { id:"m19", cat:"ドリンク", name:"ソフトドリンク各種", price:280, desc:"ウーロン茶・コーラ等", emoji:"🥤", rec:false, pop:0 },
+    { id:"m20", cat:"コース料理", name:"誠コース（全10品）", price:4500, desc:"黒毛和牛3種盛り含む満足コース", emoji:"🎖️", rec:true, pop:0 },
+    { id:"m21", cat:"コース料理", name:"特選コース（全12品）", price:6500, desc:"特上カルビ・厚切りタン付き", emoji:"👑", rec:false, pop:0 },
+    { id:"m22", cat:"コース料理", name:"ファミリーコース（全8品）", price:3500, desc:"お子さま連れにおすすめ", emoji:"👨‍👩‍👧", rec:false, pop:0 },
+  ];
+  const coupons = [
+    { id:"c1", title:"初回登録クーポン", benefit:"お会計から500円OFF", cond:"会員登録された方全員に自動配布／他券併用不可", type:"auto_signup",   days:60, active:true },
+    { id:"c2", title:"バースデークーポン", benefit:"お会計から10%OFF", cond:"お誕生日月のご来店限定／ご家族・ご友人とどうぞ", type:"auto_birthday", days:31, active:true },
+    { id:"c3", title:"スタンプ10個達成クーポン", benefit:"お会計から1,000円OFF", cond:"スタンプ10個達成の特典です", type:"auto_stamp", days:90, active:true },
+    { id:"c4", title:"平日限定クーポン", benefit:"ドリンク1杯無料", cond:"月〜木曜のご来店限定／お一人様1杯", type:"public", days:30, active:true },
+    { id:"c5", title:"肉の日クーポン", benefit:"黒毛和牛カルビ20%OFF", cond:"毎月29日のご来店限定", type:"public", days:35, active:true },
+    { id:"c6", title:"雨の日クーポン", benefit:"ソフトドリンク全品無料", cond:"雨の日のご来店限定／グループ全員OK", type:"public", days:30, active:true },
+    { id:"c7", title:"ご紹介クーポン", benefit:"お会計から500円OFF", cond:"お友達紹介の特典です", type:"auto_referral", days:60, active:true },
+  ];
+  const news = [
+    { id:"n1", kind:"キャンペーン", title:"本日限定！17時〜18時のご来店でドリンク1杯無料", body:"早い時間のご来店がお得！17時〜18時にご来店のアプリ会員様全員に、お好きなドリンクを1杯サービスいたします。", date: today },
+    { id:"n2", kind:"新メニュー", title:"秋の限定メニュー「黒毛和牛ときのこの旨辛焼き」登場", body:"熊本県産きのこと黒毛和牛を特製旨辛ダレで。9月末までの期間限定です。", date: addDaysStr(today,-3) },
+    { id:"n3", kind:"お知らせ", title:"八代店 駐車場拡張のお知らせ", body:"ご好評につき、八代店の専用駐車場を15台に拡張いたしました。", date: addDaysStr(today,-7) },
+    { id:"n4", kind:"キャンペーン", title:"毎月29日は「肉の日」！黒毛和牛カルビ20%OFF", body:"アプリ会員様限定。クーポン画面から「肉の日クーポン」を取得してご来店ください。", date: addDaysStr(today,-10) },
+  ];
+  const users = [
+    { id:"admin", loginId:"123", pass:"123", role:"admin", name:"管理者" },
+    { id:"u1", loginId:"000", pass:"000", role:"customer", name:"山田 太郎", email:"yamada@example.com",
+      birth:"1995-04-12", gender:"男性", phone:"090-1111-2222", favStore:"s1",
+      points:340, stamps:7, refCode:"SEI-0001", createdAt:addDaysStr(today,-120), lastReadPush:0, bdayYear:0 },
+  ];
+  const NAMES = ["佐藤 花子","鈴木 一郎","田中 美咲","中村 健","小林 直子","加藤 大輔","吉田 里奈","松本 剛","井上 彩","木村 拓也","林 由美","清水 翔"];
+  const visits = []; const points = []; const userCoupons = []; const reservations = [];
+  NAMES.forEach((nm, i) => {
+    const uidStr = "u" + (i + 2);
+    users.push({ id:uidStr, loginId:"user" + (i+2), pass:"pass", role:"customer", name:nm,
+      email:"user" + (i+2) + "@example.com", birth:(1975 + i) + "-" + String((i % 12) + 1).padStart(2,"0") + "-15",
+      gender: i % 2 ? "女性" : "男性", phone:"090-33" + String(i).padStart(2,"0") + "-44" + String(i).padStart(2,"0"),
+      favStore:"s" + ((i % 3) + 1), points:(i * 37) % 400, stamps:(i * 3) % 10,
+      refCode:"SEI-" + String(i + 2).padStart(4,"0"), createdAt:addDaysStr(today, -150 + i * 9), lastReadPush:0, bdayYear:0 });
+    const nVisits = 2 + (i % 5);
+    for(let v = 0; v < nVisits; v++){
+      const back = (i * 7 + v * 11) % 75;
+      const st = "s" + (((i + v) % 3) + 1);
+      const hh = 17 + ((i + v * 2) % 6);
+      const amount = 3000 + ((i + v) % 5) * 1200;
+      visits.push({ id:"v" + i + "_" + v, userId:uidStr, storeId:st, date:addDaysStr(today, -back),
+        time:String(hh).padStart(2,"0") + ":00", amount });
+    }
+  });
+  // デモ顧客 u1 の履歴
+  [["s1",-45,"18:00",5600],["s1",-30,"19:00",8800],["s2",-14,"18:30",4200],["s1",-5,"17:30",6400]].forEach((v,i)=>{
+    visits.push({ id:"v_u1_" + i, userId:"u1", storeId:v[0], date:addDaysStr(today, v[1]), time:v[2], amount:v[3] });
+    points.push({ id:"p_u1_" + i, userId:"u1", delta:Math.floor(v[3]/100), reason:"来店ポイント（" + fmtD(addDaysStr(today,v[1])) + "）", date:addDaysStr(today, v[1]) });
+  });
+  userCoupons.push(
+    { id:"uc1", userId:"u1", couponId:"c4", gotAt:addDaysStr(today,-6), expireAt:addDaysStr(today,24), used:false, usedAt:null },
+    { id:"uc2", userId:"u1", couponId:"c1", gotAt:addDaysStr(today,-120), expireAt:addDaysStr(today,-60), used:true, usedAt:addDaysStr(today,-100) },
+  );
+  reservations.push({ id:"r1", userId:"u1", storeId:"s1", date:addDaysStr(today,3), time:"18:30", people:4,
+    seat:"個室", course:"誠コース（全10品）", name:"山田 太郎", phone:"090-1111-2222", note:"窓際の席を希望します",
+    status:"confirmed", createdAt:today });
+  const pushes = [
+    { id:1, title:"本日は早割キャンペーン！", body:"17時〜18時のご来店でドリンク1杯無料です。", date: today },
+  ];
+  return { session:null, stores, menus, coupons, news, users, visits, points, userCoupons, reservations, pushes,
+    couponUse:[], seatTypes:["テーブル","座敷","個室","カウンター"] };
+}
+function loadDB(){
+  try{ const raw = localStorage.getItem(DB_KEY); if(raw){ db = JSON.parse(raw); return; } }catch(e){}
+  db = seed(); saveDB();
+}
+function saveDB(){ localStorage.setItem(DB_KEY, JSON.stringify(db)); }
+
+/* ---------- 状態 ---------- */
+const state = { authTab:"login", tab:"home", adminPage:"dash", storeId:null, menuCat:"おすすめ",
+  resEdit:null, resPrefStore:null, adResDate:todayStr() };
+function me(){ return db.session ? db.users.find(u => u.id === db.session.userId) : null; }
+function store(id){ return db.stores.find(s => s.id === id); }
+function coupon(id){ return db.coupons.find(c => c.id === id); }
+
+/* ---------- クーポン発行・共通ロジック ---------- */
+function issueCoupon(userId, couponId){
+  const c = coupon(couponId); if(!c) return;
+  db.userCoupons.push({ id:uid("uc"), userId, couponId, gotAt:todayStr(),
+    expireAt:addDaysStr(todayStr(), c.days || 30), used:false, usedAt:null });
+}
+function pushMsg(title, body){
+  const id = (db.pushes.reduce((m,p)=>Math.max(m,p.id),0)) + 1;
+  db.pushes.unshift({ id, title, body, date:todayStr() });
+}
+function lastVisitOf(userId){
+  const vs = db.visits.filter(v => v.userId === userId).sort((a,b)=>b.date.localeCompare(a.date));
+  return vs.length ? vs[0].date : null;
+}
+/* 来店処理：来店1回=1スタンプ、100円=1ポイント、10スタンプで1,000円OFFクーポン */
+function recordVisit(userId, storeId, dateStr, time, amount){
+  const u = db.users.find(x => x.id === userId); if(!u) return;
+  db.visits.push({ id:uid("v"), userId, storeId, date:dateStr, time, amount });
+  const pt = Math.floor(amount / 100);
+  u.points = (u.points || 0) + pt;
+  db.points.push({ id:uid("p"), userId, delta:pt, reason:"来店ポイント（" + store(storeId).name + "）", date:dateStr });
+  u.stamps = (u.stamps || 0) + 1;
+  let stampCoupon = false;
+  if(u.stamps >= 10){ u.stamps -= 10; issueCoupon(userId, "c3"); stampCoupon = true; }
+  saveDB();
+  return { pt, stampCoupon };
+}
+/* 誕生日月チェック（ログイン時） */
+function checkBirthday(u){
+  if(!u.birth) return;
+  const now = new Date();
+  if(Number(u.birth.slice(5,7)) === now.getMonth() + 1 && u.bdayYear !== now.getFullYear()){
+    u.bdayYear = now.getFullYear();
+    issueCoupon(u.id, "c2");
+    saveDB();
+    setTimeout(()=>toast("🎂 バースデークーポンが届きました！"), 600);
+  }
+}
+
+/* =====================================================
+   画面描画
+   ===================================================== */
+function render(){
+  const u = me();
+  if(!u){ renderAuth(); return; }
+  if(u.role === "admin"){ renderAdmin(); } else { renderCustomer(); }
+}
+
+/* ---------- 認証 ---------- */
+function renderAuth(){
+  const storeOpts = db.stores.map(s => `<option value="${s.id}">${esc(s.name)}</option>`).join("");
+  $("#app").innerHTML = `
+  <div class="auth-wrap">
+    <div class="logo">
+      <div class="mark">🔥</div>
+      <h1>焼肉 誠</h1>
+      <p>YAKINIKU MAKOTO ｜ 熊本3店舗 公式アプリ</p>
+    </div>
+    <div class="card">
+      <div class="auth-tabs">
+        <button class="${state.authTab==='login'?'on':''}" onclick="setAuthTab('login')">ログイン</button>
+        <button class="${state.authTab==='register'?'on':''}" onclick="setAuthTab('register')">新規会員登録</button>
+      </div>
+      ${state.authTab === "login" ? `
+        <label>ID または メールアドレス</label>
+        <input id="liId" placeholder="例：000">
+        <label>パスワード</label>
+        <input id="liPw" type="password" placeholder="例：000">
+        <div style="height:18px"></div>
+        <button class="btn block" onclick="doLogin()">ログイン</button>
+        <p class="muted" style="margin-top:14px;line-height:1.8">テスト用アカウント<br>
+        お客様：ID <b>000</b> ／ パスワード <b>000</b><br>
+        管理者：ID <b>123</b> ／ パスワード <b>123</b></p>
+      ` : `
+        <label>お名前 <span style="color:#e07b6d">*</span></label>
+        <input id="rgName" placeholder="例：焼肉 花子">
+        <label>メールアドレス <span style="color:#e07b6d">*</span></label>
+        <input id="rgEmail" type="email" placeholder="例：hanako@example.com">
+        <label>パスワード <span style="color:#e07b6d">*</span></label>
+        <input id="rgPw" type="password">
+        <label>生年月日（バースデークーポンをお届けします）</label>
+        <input id="rgBirth" type="date">
+        <label>性別（任意）</label>
+        <select id="rgGender"><option value="">選択しない</option><option>男性</option><option>女性</option><option>その他</option></select>
+        <label>電話番号</label>
+        <input id="rgPhone" placeholder="090-0000-0000">
+        <label>お気に入り店舗</label>
+        <select id="rgFav">${storeOpts}</select>
+        <label>お友達紹介コード（お持ちの方のみ）</label>
+        <input id="rgRef" placeholder="例：SEI-0001">
+        <div style="height:18px"></div>
+        <button class="btn block" onclick="doRegister()">登録して500円OFFクーポンをもらう</button>
+        <p class="muted" style="margin-top:12px">登録後すぐに「初回登録クーポン（500円OFF）」をお届けします。</p>
+      `}
+    </div>
+  </div>`;
+}
+window.setAuthTab = t => { state.authTab = t; render(); };
+window.doLogin = () => {
+  const id = $("#liId").value.trim(), pw = $("#liPw").value;
+  const u = db.users.find(x => (x.loginId === id || x.email === id) && x.pass === pw);
+  if(!u){ toast("IDまたはパスワードが違います"); return; }
+  db.session = { userId: u.id }; saveDB();
+  state.tab = "home"; state.adminPage = "dash";
+  if(u.role === "customer") checkBirthday(u);
+  render();
+};
+window.doRegister = () => {
+  const name = $("#rgName").value.trim(), email = $("#rgEmail").value.trim(), pw = $("#rgPw").value;
+  if(!name || !email || !pw){ toast("お名前・メール・パスワードは必須です"); return; }
+  if(db.users.some(x => x.email === email || x.loginId === email)){ toast("このメールアドレスは登録済みです"); return; }
+  const id = uid("u");
+  const refInput = $("#rgRef").value.trim();
+  const u = { id, loginId:email, pass:pw, role:"customer", name, email,
+    birth:$("#rgBirth").value || "", gender:$("#rgGender").value, phone:$("#rgPhone").value.trim(),
+    favStore:$("#rgFav").value, points:0, stamps:0,
+    refCode:"SEI-" + String(db.users.length + 1).padStart(4,"0"),
+    createdAt:todayStr(), lastReadPush:0, bdayYear:0 };
+  db.users.push(u);
+  issueCoupon(id, "c1");   // 初回登録500円OFF
+  if(refInput){
+    const referrer = db.users.find(x => x.refCode === refInput && x.role === "customer");
+    if(referrer){
+      referrer.points = (referrer.points || 0) + 500;
+      db.points.push({ id:uid("p"), userId:referrer.id, delta:500, reason:"お友達紹介ポイント（" + name + "様）", date:todayStr() });
+      issueCoupon(id, "c7"); // 紹介された人 500円OFF
+      toast("紹介コード適用！500円OFFクーポンを追加しました");
+    }
+  }
+  db.session = { userId:id }; saveDB();
+  state.tab = "home";
+  checkBirthday(u);
+  render();
+};
+window.doLogout = () => { db.session = null; saveDB(); state.authTab = "login"; render(); };
+
+/* =====================================================
+   お客様アプリ
+   ===================================================== */
+function renderCustomer(){
+  const u = me();
+  const unread = db.pushes.filter(p => p.id > (u.lastReadPush || 0)).length;
+  const tabs = [
+    ["home","🏠","ホーム"],["stores","🏮","店舗"],["reserve","📅","予約"],["coupons","🎫","クーポン"],["mypage","👤","マイページ"]
+  ];
+  const body = { home:cHome, stores:cStores, reserve:cReserve, coupons:cCoupons, mypage:cMyPage }[state.tab]();
+  $("#app").innerHTML = `
+  <div class="phone">
+    <div class="app-header">
+      <div class="ttl">🔥 焼肉 誠</div>
+      <button class="bell" onclick="openPushes()">🔔${unread ? `<span class="cnt">${unread}</span>` : ""}</button>
+    </div>
+    <div class="app-body">${body}</div>
+    <div class="bottom-nav">
+      ${tabs.map(t => `<button class="${state.tab===t[0]?'on':''}" onclick="setTab('${t[0]}')"><span class="ic">${t[1]}</span>${t[2]}</button>`).join("")}
+    </div>
+  </div>`;
+}
+window.setTab = t => { state.tab = t; state.storeId = null; state.resEdit = null; render(); window.scrollTo(0,0); };
+window.openPushes = () => {
+  const u = me();
+  const list = db.pushes.map(p => `
+    <div style="padding:12px 0;border-bottom:1px solid var(--line)">
+      <div class="muted">${fmtD(p.date)}</div>
+      <b style="font-size:14px">${esc(p.title)}</b>
+      <div style="font-size:12px;line-height:1.7;margin-top:4px">${esc(p.body)}</div>
+    </div>`).join("") || `<p class="muted">お知らせはまだありません</p>`;
+  u.lastReadPush = db.pushes.reduce((m,p)=>Math.max(m,p.id),0); saveDB();
+  modal(`<h3>🔔 通知</h3>${list}<div style="height:14px"></div><button class="btn block ghost" onclick="closeModal();render()">閉じる</button>`);
+};
+
+/* ---------- ホーム ---------- */
+function cHome(){
+  const u = me();
+  const camp = db.news.filter(n => n.kind === "キャンペーン")[0];
+  const recs = db.menus.filter(m => m.rec);
+  const newsList = db.news.slice(0, 4);
+  const myCoupons = db.userCoupons.filter(c => c.userId === u.id && !c.used && c.expireAt >= todayStr());
+  return `
+    <p style="font-size:13px;color:var(--muted)">こんにちは、<b style="color:var(--text)">${esc(u.name)}</b> さん</p>
+    ${camp ? `
+    <div class="hero" style="margin-top:12px">
+      <span class="tag red">本日のキャンペーン</span>
+      <h2>${esc(camp.title)}</h2>
+      <p>${esc(camp.body)}</p>
+      <div style="margin-top:14px"><button class="btn small" onclick="setTab('reserve')">今すぐ予約する</button></div>
+    </div>` : ""}
+    <div class="card row between" onclick="setTab('coupons')" style="cursor:pointer">
+      <div><div class="muted">利用できるクーポン</div>
+        <b style="font-size:18px;color:var(--gold2)">${myCoupons.length}枚</b></div>
+      <div><div class="muted">保有ポイント</div>
+        <b style="font-size:18px;color:var(--gold2)">${(u.points||0).toLocaleString()} pt</b></div>
+      <span style="color:var(--muted)">›</span>
+    </div>
+    <div class="sec-title">おすすめメニュー</div>
+    <div class="menu-scroll">
+      ${recs.map(m => `
+        <div class="m-card">
+          <div class="ph">${m.emoji}</div>
+          <div class="bd"><div class="nm">${esc(m.name)}</div><div class="pr">${yen(m.price)}</div></div>
+        </div>`).join("")}
+    </div>
+    <div class="sec-title">お知らせ・キャンペーン</div>
+    ${newsList.map(n => `
+      <div class="card" style="padding:13px 16px">
+        <div class="row between"><span class="tag ${n.kind==='キャンペーン'?'red':''}">${esc(n.kind)}</span><span class="muted">${fmtD(n.date)}</span></div>
+        <b style="display:block;font-size:14px;margin-top:8px;line-height:1.5">${esc(n.title)}</b>
+        <p style="font-size:12px;color:var(--muted);margin-top:5px;line-height:1.7">${esc(n.body)}</p>
+      </div>`).join("")}
+  `;
+}
+
+/* ---------- 店舗 ---------- */
+function cStores(){
+  if(state.storeId) return cStoreDetail(state.storeId);
+  const u = me();
+  return `
+    <h2 style="font-size:17px;letter-spacing:.1em;margin-bottom:4px">店舗一覧</h2>
+    <p class="muted" style="margin-bottom:14px">熊本県内3店舗でお待ちしております</p>
+    ${db.stores.map(s => `
+      <div class="card store-card">
+        <div class="ph" style="background:${s.color}">${s.emoji}　${esc(s.name)}</div>
+        <div class="bd">
+          <div class="row between">
+            <span class="muted">${esc(s.address)}</span>
+            <button class="fav-btn" onclick="event.stopPropagation();toggleFav('${s.id}')">${u.favStore===s.id?"⭐":"☆"}</button>
+          </div>
+          <p style="font-size:12px;margin:8px 0;line-height:1.7">${esc(s.feature)}</p>
+          <div class="row">
+            <button class="btn small ghost" onclick="openStore('${s.id}')">店舗情報</button>
+            <button class="btn small" onclick="reserveAt('${s.id}')">予約する</button>
+          </div>
+        </div>
+      </div>`).join("")}
+  `;
+}
+window.openStore = id => { state.storeId = id; render(); window.scrollTo(0,0); };
+window.reserveAt = id => { state.resPrefStore = id; state.tab = "reserve"; state.storeId = null; render(); window.scrollTo(0,0); };
+window.toggleFav = id => {
+  const u = me();
+  u.favStore = u.favStore === id ? null : id; saveDB();
+  toast(u.favStore ? "お気に入り店舗に登録しました" : "お気に入りを解除しました");
+  render();
+};
+function cStoreDetail(id){
+  const s = store(id); const u = me();
+  const cats = ["おすすめ", ...new Set(db.menus.map(m => m.cat))];
+  const cat = state.menuCat;
+  let items = cat === "おすすめ" ? db.menus.filter(m => m.rec) : db.menus.filter(m => m.cat === cat);
+  const ranking = db.menus.filter(m => m.pop > 0).sort((a,b)=>a.pop-b.pop).slice(0,5);
+  return `
+    <button class="btn small ghost" onclick="state.storeId=null;render()">‹ 店舗一覧へ</button>
+    <div class="card store-card" style="margin-top:12px">
+      <div class="ph" style="background:${s.color};height:130px">${s.emoji}　${esc(s.name)}</div>
+      <div class="bd">
+        <div class="row between">
+          <span class="tag">${esc(s.closed)}定休</span>
+          <button class="fav-btn" onclick="toggleFav('${s.id}')">${u.favStore===s.id?"⭐":"☆"}</button>
+        </div>
+        <table class="info-tbl" style="margin-top:10px">
+          <tr><th>住所</th><td>${esc(s.address)}</td></tr>
+          <tr><th>営業時間</th><td>${esc(s.hours)}</td></tr>
+          <tr><th>定休日</th><td>${esc(s.closed)}</td></tr>
+          <tr><th>電話番号</th><td><a href="tel:${esc(s.tel)}">${esc(s.tel)}</a></td></tr>
+          <tr><th>駐車場</th><td>${esc(s.parking)}</td></tr>
+          <tr><th>アクセス</th><td>${esc(s.access)}</td></tr>
+        </table>
+        <div class="row" style="margin-top:12px">
+          <a class="btn small ghost" href="https://www.google.com/maps/search/${encodeURIComponent(s.address)}" target="_blank" rel="noopener">🗺 地図を見る</a>
+          <button class="btn small" onclick="reserveAt('${s.id}')">この店舗を予約</button>
+        </div>
+      </div>
+    </div>
+    <div class="sec-title">人気ランキング</div>
+    <div class="card">
+      ${ranking.map((m,i)=>`
+        <div class="menu-row" style="${i===ranking.length-1?'border-bottom:none':''}">
+          <div class="ph">${m.emoji}</div>
+          <div><span class="rank-num">${i+1}</span><span class="nm">${esc(m.name)}</span>
+            <div class="ds">${esc(m.desc)}</div></div>
+          <div class="pr">${yen(m.price)}</div>
+        </div>`).join("")}
+    </div>
+    <div class="sec-title">メニュー</div>
+    <div class="cat-tabs">
+      ${cats.map(c => `<button class="${cat===c?'on':''}" onclick="setMenuCat('${esc(c)}')">${esc(c)}</button>`).join("")}
+    </div>
+    <div class="card">
+      ${items.map(m => `
+        <div class="menu-row">
+          <div class="ph">${m.emoji}</div>
+          <div><div class="nm">${esc(m.name)}</div><div class="ds">${esc(m.desc)}</div></div>
+          <div class="pr">${yen(m.price)}</div>
+        </div>`).join("") || `<p class="muted">このカテゴリーのメニューはありません</p>`}
+    </div>
+  `;
+}
+window.setMenuCat = c => { state.menuCat = c; render(); };
+
+/* ---------- 予約 ---------- */
+function cReserve(){
+  const u = me();
+  const edit = state.resEdit ? db.reservations.find(r => r.id === state.resEdit) : null;
+  const prefStore = edit ? edit.storeId : (state.resPrefStore || u.favStore || "s1");
+  const courses = db.menus.filter(m => m.cat === "コース料理");
+  const times = [];
+  for(let h = 17; h <= 21; h++){ times.push(h + ":00"); times.push(h + ":30"); }
+  const myRes = db.reservations.filter(r => r.userId === u.id && r.status !== "cancelled" && r.date >= todayStr())
+    .sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
+  const past = db.reservations.filter(r => r.userId === u.id && (r.status === "cancelled" || r.date < todayStr()))
+    .sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time)).slice(0,5);
+  const stLabel = { confirmed:"予約中", visited:"来店済み", cancelled:"キャンセル" };
+  return `
+    <h2 style="font-size:17px;letter-spacing:.1em;margin-bottom:14px">${edit ? "予約の変更" : "来店予約"}</h2>
+    <div class="card">
+      <label>店舗</label>
+      <select id="rsStore">${db.stores.map(s => `<option value="${s.id}" ${s.id===prefStore?'selected':''}>${esc(s.name)}</option>`).join("")}</select>
+      <div class="grid2">
+        <div><label>日付</label><input id="rsDate" type="date" min="${todayStr()}" value="${edit?edit.date:addDaysStr(todayStr(),1)}"></div>
+        <div><label>時間</label><select id="rsTime">${times.map(t => `<option ${edit&&edit.time===t?'selected':''}>${t}</option>`).join("")}</select></div>
+      </div>
+      <div class="grid2">
+        <div><label>人数</label><select id="rsPeople">${[1,2,3,4,5,6,7,8,9,10].map(n => `<option value="${n}" ${edit&&edit.people===n?'selected':(!edit&&n===2?'selected':'')}>${n}名</option>`).join("")}</select></div>
+        <div><label>席種</label><select id="rsSeat">${db.seatTypes.map(s => `<option ${edit&&edit.seat===s?'selected':''}>${s}</option>`).join("")}</select></div>
+      </div>
+      <label>コース（任意）</label>
+      <select id="rsCourse"><option value="">コースなし（アラカルト）</option>
+        ${courses.map(c => `<option ${edit&&edit.course===c.name?'selected':''}>${esc(c.name)}</option>`).join("")}</select>
+      <label>お名前</label>
+      <input id="rsName" value="${esc(edit?edit.name:u.name)}">
+      <label>電話番号</label>
+      <input id="rsPhone" value="${esc(edit?edit.phone:(u.phone||""))}">
+      <label>ご要望（任意）</label>
+      <textarea id="rsNote" rows="2" placeholder="例：アレルギー、お子さま連れ、記念日など">${esc(edit?edit.note:"")}</textarea>
+      <div style="height:16px"></div>
+      ${edit ? `
+        <div class="row">
+          <button class="btn block" style="flex:1" onclick="submitReservation('${edit.id}')">変更を確定する</button>
+          <button class="btn ghost" onclick="state.resEdit=null;render()">戻る</button>
+        </div>` : `
+        <button class="btn block" onclick="submitReservation()">この内容で予約する</button>`}
+    </div>
+    <div class="sec-title">今後のご予約</div>
+    ${myRes.length ? myRes.map(r => `
+      <div class="card">
+        <div class="row between">
+          <b style="font-size:14px">${fmtD(r.date)} ${r.time}</b>
+          <span class="tag green">${stLabel[r.status]}</span>
+        </div>
+        <p style="font-size:13px;margin-top:6px">${esc(store(r.storeId).name)}／${r.people}名／${esc(r.seat)}${r.course ? "／" + esc(r.course) : ""}</p>
+        ${r.note ? `<p class="muted" style="margin-top:4px">要望：${esc(r.note)}</p>` : ""}
+        <div class="row" style="margin-top:10px">
+          <button class="btn small ghost" onclick="editReservation('${r.id}')">変更</button>
+          <button class="btn small danger" onclick="cancelReservation('${r.id}')">キャンセル</button>
+        </div>
+      </div>`).join("") : `<p class="muted">今後のご予約はありません</p>`}
+    ${past.length ? `<div class="sec-title">過去の予約</div>
+      ${past.map(r => `
+        <div class="list-item">
+          <span>${fmtD(r.date)} ${r.time}　${esc(store(r.storeId).name)}　${r.people}名</span>
+          <span class="tag ${r.status==='cancelled'?'red':''}">${stLabel[r.status]}</span>
+        </div>`).join("")}` : ""}
+  `;
+}
+window.submitReservation = (editId) => {
+  const u = me();
+  const date = $("#rsDate").value, name = $("#rsName").value.trim(), phone = $("#rsPhone").value.trim();
+  if(!date){ toast("日付を選択してください"); return; }
+  if(date < todayStr()){ toast("過去の日付は選択できません"); return; }
+  if(!name || !phone){ toast("お名前と電話番号を入力してください"); return; }
+  const data = { storeId:$("#rsStore").value, date, time:$("#rsTime").value,
+    people:Number($("#rsPeople").value), seat:$("#rsSeat").value, course:$("#rsCourse").value,
+    name, phone, note:$("#rsNote").value.trim() };
+  if(editId){
+    Object.assign(db.reservations.find(r => r.id === editId), data);
+    state.resEdit = null; toast("予約を変更しました");
+  }else{
+    db.reservations.push({ id:uid("r"), userId:u.id, ...data, status:"confirmed", createdAt:todayStr() });
+    toast("ご予約を承りました！");
+  }
+  state.resPrefStore = null; saveDB(); render(); window.scrollTo(0,0);
+};
+window.editReservation = id => { state.resEdit = id; render(); window.scrollTo(0,0); };
+window.cancelReservation = id => {
+  modal(`<h3>予約のキャンセル</h3><p style="font-size:13px;line-height:1.8">この予約をキャンセルしますか？</p>
+    <div class="row" style="margin-top:18px">
+      <button class="btn danger" style="flex:1" onclick="confirmCancelRes('${id}')">キャンセルする</button>
+      <button class="btn ghost" style="flex:1" onclick="closeModal()">戻る</button>
+    </div>`);
+};
+window.confirmCancelRes = id => {
+  db.reservations.find(r => r.id === id).status = "cancelled";
+  saveDB(); closeModal(); toast("予約をキャンセルしました"); render();
+};
+
+/* ---------- クーポン ---------- */
+function cCoupons(){
+  const u = me(); const today = todayStr();
+  const mine = db.userCoupons.filter(c => c.userId === u.id).sort((a,b)=>Number(a.used)-Number(b.used) || b.gotAt.localeCompare(a.gotAt));
+  const held = new Set(mine.filter(c => !c.used && c.expireAt >= today).map(c => c.couponId));
+  const claimable = db.coupons.filter(c => c.type === "public" && c.active && !held.has(c.id));
+  return `
+    <h2 style="font-size:17px;letter-spacing:.1em;margin-bottom:14px">クーポン</h2>
+    ${claimable.length ? `<div class="sec-title">受け取れるクーポン</div>
+      ${claimable.map(c => `
+        <div class="coupon">
+          <span class="tag">配布中</span>
+          <div class="bene">${esc(c.benefit)}</div>
+          <b style="font-size:13px">${esc(c.title)}</b>
+          <p class="cond" style="margin-top:4px">${esc(c.cond)}</p>
+          <div style="margin-top:12px"><button class="btn small" onclick="claimCoupon('${c.id}')">クーポンを受け取る</button></div>
+        </div>`).join("")}` : ""}
+    <div class="sec-title">保有クーポン</div>
+    ${mine.length ? mine.map(ucRow).join("") : `<p class="muted">保有クーポンはありません。「受け取れるクーポン」からゲットしてください！</p>`}
+  `;
+}
+function ucRow(uc){
+  const c = coupon(uc.couponId); const today = todayStr();
+  const expired = !uc.used && uc.expireAt < today;
+  return `
+    <div class="coupon ${uc.used || expired ? "used" : ""}">
+      <div class="row between">
+        <b style="font-size:13px">${esc(c.title)}</b>
+        ${uc.used ? `<span class="tag">利用済み</span>` : expired ? `<span class="tag red">期限切れ</span>` : ""}
+      </div>
+      <div class="bene">${esc(c.benefit)}</div>
+      <p class="cond">${esc(c.cond)}</p>
+      <p class="exp">有効期限：${fmtD(uc.expireAt)} まで</p>
+      ${!uc.used && !expired ? `<div style="margin-top:12px"><button class="btn small" onclick="useCoupon('${uc.id}')">お店で使う</button></div>` : ""}
+    </div>`;
+}
+window.claimCoupon = cid => {
+  issueCoupon(me().id, cid); saveDB();
+  toast("クーポンを受け取りました！"); render();
+};
+window.useCoupon = ucId => {
+  const uc = db.userCoupons.find(x => x.id === ucId); const c = coupon(uc.couponId);
+  modal(`<h3>🎫 クーポン利用</h3>
+    <div class="coupon" style="text-align:center">
+      <b>${esc(c.title)}</b>
+      <div class="bene" style="font-size:24px">${esc(c.benefit)}</div>
+      <p class="cond">${esc(c.cond)}</p>
+    </div>
+    <p style="font-size:13px;line-height:1.8;color:var(--muted)">この画面を<b style="color:var(--text)">店舗スタッフにご提示</b>ください。
+    スタッフ確認のもと、下のボタンを押すと利用済みになります。</p>
+    <div class="row" style="margin-top:16px">
+      <button class="btn" style="flex:1" onclick="confirmUseCoupon('${ucId}')">スタッフ確認済み・使用する</button>
+      <button class="btn ghost" onclick="closeModal()">戻る</button>
+    </div>`);
+};
+window.confirmUseCoupon = ucId => {
+  const uc = db.userCoupons.find(x => x.id === ucId);
+  uc.used = true; uc.usedAt = todayStr();
+  db.couponUse.push({ id:uid("cu"), userId:uc.userId, couponId:uc.couponId, date:todayStr() });
+  saveDB(); closeModal(); toast("クーポンを使用しました。ありがとうございます！"); render();
+};
+
+/* ---------- マイページ ---------- */
+function cMyPage(){
+  const u = me();
+  const stamps = u.stamps || 0;
+  const visits = db.visits.filter(v => v.userId === u.id).sort((a,b)=>b.date.localeCompare(a.date));
+  const pts = db.points.filter(p => p.userId === u.id).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,8);
+  const usedCoupons = db.userCoupons.filter(c => c.userId === u.id && c.used).sort((a,b)=>(b.usedAt||"").localeCompare(a.usedAt||""));
+  const fav = u.favStore ? store(u.favStore) : null;
+  return `
+    <div class="card" style="background:linear-gradient(135deg,#241c10,#14100a);border-color:var(--gold)">
+      <div class="row between">
+        <div>
+          <div class="muted">会員名</div>
+          <b style="font-size:18px">${esc(u.name)} さん</b>
+          <div class="muted" style="margin-top:4px">お気に入り店舗：${fav ? esc(fav.name) : "未設定"}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="muted">保有ポイント</div>
+          <div class="point-big">${(u.points||0).toLocaleString()}<small style="font-size:14px"> pt</small></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="row between">
+        <b style="font-size:14px">スタンプカード</b>
+        <span class="muted">来店1回＝1スタンプ</span>
+      </div>
+      <div class="stamp-grid">
+        ${Array.from({length:10},(_,i)=>`<div class="stamp ${i<stamps?'on':''}">${i<stamps?"🔥":i+1}</div>`).join("")}
+      </div>
+      <p class="muted" style="text-align:center">あと <b style="color:var(--gold2)">${10-stamps}個</b> で 1,000円OFFクーポンをプレゼント！</p>
+    </div>
+    <div class="card">
+      <div class="row between">
+        <b style="font-size:14px">お友達紹介</b><span class="tag">双方に特典</span>
+      </div>
+      <p style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.8">
+        あなたの紹介コードを伝えて登録してもらうと、<br>あなたに<b style="color:var(--gold2)">500ポイント</b>、お友達に<b style="color:var(--gold2)">500円OFFクーポン</b>！</p>
+      <div style="text-align:center;background:var(--panel2);border:1px dashed var(--gold);border-radius:10px;padding:12px;margin-top:10px">
+        <span style="font-size:20px;letter-spacing:.2em;color:var(--gold2);font-weight:700">${esc(u.refCode)}</span>
+      </div>
+    </div>
+    <div class="sec-title">来店履歴</div>
+    <div class="card">
+      ${visits.length ? visits.slice(0,8).map(v => `
+        <div class="list-item">
+          <span>${fmtD(v.date)} ${v.time}　${esc(store(v.storeId).name)}</span>
+          <span class="muted">${yen(v.amount)}</span>
+        </div>`).join("") : `<p class="muted">来店履歴はまだありません</p>`}
+    </div>
+    <div class="sec-title">ポイント履歴</div>
+    <div class="card">
+      ${pts.length ? pts.map(p => `
+        <div class="list-item">
+          <span>${fmtD(p.date)}　${esc(p.reason)}</span>
+          <b style="color:${p.delta>=0?'var(--gold2)':'#e07b6d'}">${p.delta>=0?"+":""}${p.delta}pt</b>
+        </div>`).join("") : `<p class="muted">ポイント履歴はまだありません</p>`}
+    </div>
+    <div class="sec-title">クーポン利用履歴</div>
+    <div class="card">
+      ${usedCoupons.length ? usedCoupons.map(uc => `
+        <div class="list-item">
+          <span>${fmtD(uc.usedAt)}　${esc(coupon(uc.couponId).title)}</span>
+          <span class="tag">利用済み</span>
+        </div>`).join("") : `<p class="muted">クーポン利用履歴はまだありません</p>`}
+    </div>
+    <div style="height:10px"></div>
+    <button class="btn block ghost" onclick="openProfile()">会員情報の変更</button>
+    <div style="height:10px"></div>
+    <button class="btn block danger" onclick="doLogout()">ログアウト</button>
+  `;
+}
+window.openProfile = () => {
+  const u = me();
+  modal(`<h3>会員情報の変更</h3>
+    <label>お名前</label><input id="pfName" value="${esc(u.name)}">
+    <label>電話番号</label><input id="pfPhone" value="${esc(u.phone||"")}">
+    <label>生年月日</label><input id="pfBirth" type="date" value="${esc(u.birth||"")}">
+    <label>性別</label><select id="pfGender">
+      ${["","男性","女性","その他"].map(g => `<option value="${g}" ${u.gender===g?'selected':''}>${g||"選択しない"}</option>`).join("")}</select>
+    <label>お気に入り店舗</label><select id="pfFav">
+      ${db.stores.map(s => `<option value="${s.id}" ${u.favStore===s.id?'selected':''}>${esc(s.name)}</option>`).join("")}</select>
+    <label>パスワード（変更する場合のみ入力）</label><input id="pfPw" type="password">
+    <div class="row" style="margin-top:18px">
+      <button class="btn" style="flex:1" onclick="saveProfile()">保存する</button>
+      <button class="btn ghost" onclick="closeModal()">戻る</button>
+    </div>`);
+};
+window.saveProfile = () => {
+  const u = me();
+  const name = $("#pfName").value.trim();
+  if(!name){ toast("お名前を入力してください"); return; }
+  u.name = name; u.phone = $("#pfPhone").value.trim(); u.birth = $("#pfBirth").value;
+  u.gender = $("#pfGender").value; u.favStore = $("#pfFav").value;
+  const pw = $("#pfPw").value; if(pw) u.pass = pw;
+  saveDB(); closeModal(); toast("会員情報を保存しました"); render();
+};
+
+/* =====================================================
+   管理画面
+   ===================================================== */
+function renderAdmin(){
+  const pages = [
+    ["dash","📊 ダッシュボード"],["res","📅 予約管理"],["cust","👥 顧客管理"],["coup","🎫 クーポン管理"],
+    ["menu","🍖 メニュー管理"],["store","🏮 店舗管理"],["news","📢 お知らせ・キャンペーン"],["push","🔔 プッシュ通知"]
+  ];
+  const body = { dash:aDash, res:aRes, cust:aCust, coup:aCoup, menu:aMenu, store:aStore, news:aNews, push:aPush }[state.adminPage]();
+  $("#app").innerHTML = `
+  <div class="admin">
+    <div class="side">
+      <div class="lg"><b>🔥 焼肉 誠</b><div>管理画面</div></div>
+      ${pages.map(p => `<button class="${state.adminPage===p[0]?'on':''}" onclick="setAdminPage('${p[0]}')">${p[1]}</button>`).join("")}
+      <button class="lo" onclick="doLogout()">ログアウト</button>
+    </div>
+    <div class="main">${body}</div>
+  </div>`;
+}
+window.setAdminPage = p => { state.adminPage = p; render(); window.scrollTo(0,0); };
+function barChart(title, rows, unit){
+  const max = Math.max(...rows.map(r => r.value), 1);
+  return `<div class="card"><b style="font-size:13px;color:var(--gold2)">${title}</b>
+    <div style="margin-top:10px">
+    ${rows.map(r => `
+      <div class="bar-row">
+        <span class="lb">${esc(r.label)}</span>
+        <div class="tr"><div class="br" style="width:${Math.round(r.value/max*100)}%"></div></div>
+        <span class="vl">${r.value.toLocaleString()}${unit||""}</span>
+      </div>`).join("")}
+    </div></div>`;
+}
+
+/* ---------- ダッシュボード（マーケティング分析） ---------- */
+function aDash(){
+  const today = todayStr();
+  const thisMonth = today.slice(0,7);
+  const customers = db.users.filter(u => u.role === "customer");
+  const newMembers = customers.filter(u => (u.createdAt||"").slice(0,7) === thisMonth).length;
+  const todaysRes = db.reservations.filter(r => r.date === today && r.status === "confirmed").length;
+  const monthVisits = db.visits.filter(v => v.date.slice(0,7) === thisMonth);
+  const couponUsed = db.userCoupons.filter(c => c.used).length;
+  const repeaters = customers.filter(u => db.visits.filter(v => v.userId === u.id).length >= 2).length;
+
+  const byStore = db.stores.map(s => ({ label:s.name.replace("焼肉 誠 ",""), value:db.visits.filter(v => v.storeId === s.id).length }));
+  const salesByStore = db.stores.map(s => ({ label:s.name.replace("焼肉 誠 ",""),
+    value: db.visits.filter(v => v.storeId === s.id).reduce((a,v)=>a+v.amount,0) }));
+  const byWd = WD.map((w,i) => ({ label:w+"曜", value:db.visits.filter(v => new Date(v.date+"T00:00:00").getDay() === i).length }));
+  const byHour = [];
+  for(let h = 11; h <= 22; h++){
+    const n = db.visits.filter(v => Number(v.time.slice(0,2)) === h).length;
+    if(n || (h >= 17 && h <= 21)) byHour.push({ label:h+"時台", value:n });
+  }
+  const popCoupons = db.coupons.map(c => ({ label:c.title.replace("クーポン",""), value:db.userCoupons.filter(uc => uc.couponId === c.id && uc.used).length }))
+    .filter(r => r.value > 0).sort((a,b)=>b.value-a.value);
+  const popMenus = db.menus.filter(m => m.pop > 0).sort((a,b)=>a.pop-b.pop).slice(0,5)
+    .map((m,i) => ({ label:(i+1)+"位 "+m.name.slice(0,8), value:100 - m.pop*10 }));
+  const inactive = customers.map(u => ({ u, last:lastVisitOf(u.id) }))
+    .filter(x => x.last && daysBetween(x.last, today) >= 30)
+    .sort((a,b)=>a.last.localeCompare(b.last));
+  return `
+    <h2>マーケティング分析ダッシュボード</h2>
+    <div class="kpis">
+      <div class="kpi"><div class="lb">アプリ会員数</div><div class="vl">${customers.length}<small> 名</small></div></div>
+      <div class="kpi"><div class="lb">今月の新規会員</div><div class="vl">${newMembers}<small> 名</small></div></div>
+      <div class="kpi"><div class="lb">本日の予約</div><div class="vl">${todaysRes}<small> 件</small></div></div>
+      <div class="kpi"><div class="lb">今月の来店数</div><div class="vl">${monthVisits.length}<small> 回</small></div></div>
+      <div class="kpi"><div class="lb">リピーター数（2回以上）</div><div class="vl">${repeaters}<small> 名</small></div></div>
+      <div class="kpi"><div class="lb">クーポン利用累計</div><div class="vl">${couponUsed}<small> 枚</small></div></div>
+    </div>
+    <div class="charts">
+      ${barChart("店舗別 来店数（累計）", byStore, "回")}
+      ${barChart("店舗別 売上（累計）", salesByStore.map(r => ({label:r.label, value:Math.round(r.value/1000)})), "千円")}
+      ${barChart("曜日別 来店数", byWd, "回")}
+      ${barChart("時間帯別 来店数", byHour, "回")}
+      ${popCoupons.length ? barChart("人気クーポン（利用数）", popCoupons, "枚") : ""}
+      ${barChart("人気メニュー（人気度スコア）", popMenus, "")}
+    </div>
+    <div class="sec-title" style="margin-top:24px">来店が途絶えている顧客（30日以上）</div>
+    <div class="card tbl-wrap">
+      <table class="tbl">
+        <tr><th>顧客名</th><th>お気に入り店舗</th><th>最終来店日</th><th>経過日数</th><th>アクション</th></tr>
+        ${inactive.length ? inactive.map(x => `
+          <tr>
+            <td>${esc(x.u.name)}</td>
+            <td>${x.u.favStore ? esc(store(x.u.favStore).name) : "-"}</td>
+            <td>${fmtD(x.last)}</td>
+            <td><span class="tag ${daysBetween(x.last,today)>=60?'red':''}">${daysBetween(x.last,today)}日</span></td>
+            <td><button class="btn small ghost" onclick="setAdminPage('coup')">クーポンを配信</button></td>
+          </tr>`).join("") : `<tr><td colspan="5" class="muted">該当する顧客はいません</td></tr>`}
+      </table>
+    </div>
+  `;
+}
+
+/* ---------- 予約管理 ---------- */
+function aRes(){
+  const d = state.adResDate;
+  const list = db.reservations.filter(r => r.date === d).sort((a,b)=>a.time.localeCompare(b.time));
+  const stLabel = { confirmed:["予約中","green"], visited:["来店済み",""], cancelled:["キャンセル","red"] };
+  const upcoming = db.reservations.filter(r => r.status === "confirmed" && r.date >= todayStr()).length;
+  return `
+    <h2>予約管理</h2>
+    <div class="kpis">
+      <div class="kpi"><div class="lb">今後の予約件数（全店）</div><div class="vl">${upcoming}<small> 件</small></div></div>
+    </div>
+    <div class="card">
+      <div class="row">
+        <label style="margin:0">表示する日付</label>
+        <input type="date" value="${d}" style="max-width:180px" onchange="state.adResDate=this.value;render()">
+      </div>
+    </div>
+    <div class="card tbl-wrap">
+      <table class="tbl">
+        <tr><th>時間</th><th>店舗</th><th>お名前</th><th>人数</th><th>席種</th><th>コース</th><th>電話</th><th>要望</th><th>状態</th><th></th></tr>
+        ${list.length ? list.map(r => `
+          <tr>
+            <td><b>${r.time}</b></td>
+            <td>${esc(store(r.storeId).name.replace("焼肉 誠 ",""))}</td>
+            <td>${esc(r.name)}</td>
+            <td>${r.people}名</td>
+            <td>${esc(r.seat)}</td>
+            <td>${esc(r.course||"-")}</td>
+            <td>${esc(r.phone)}</td>
+            <td class="muted">${esc(r.note||"-")}</td>
+            <td><span class="tag ${stLabel[r.status][1]}">${stLabel[r.status][0]}</span></td>
+            <td>${r.status === "confirmed" ? `
+              <div class="row">
+                <button class="btn small" onclick="openVisited('${r.id}')">来店済みにする</button>
+                <button class="btn small danger" onclick="adCancelRes('${r.id}')">取消</button>
+              </div>` : ""}</td>
+          </tr>`).join("") : `<tr><td colspan="10" class="muted">${fmtD(d)} の予約はありません</td></tr>`}
+      </table>
+    </div>
+    <p class="muted">「来店済みにする」でお会計金額を入力すると、来店履歴の記録・ポイント付与（100円=1pt）・スタンプ付与（+1）が自動で行われます。</p>
+  `;
+}
+window.openVisited = resId => {
+  const r = db.reservations.find(x => x.id === resId);
+  modal(`<h3>来店済み処理</h3>
+    <p style="font-size:13px;line-height:1.8">${esc(r.name)} 様（${fmtD(r.date)} ${r.time}／${esc(store(r.storeId).name)}）</p>
+    <label>お会計金額（円）</label>
+    <input id="vsAmount" type="number" min="0" step="100" placeholder="例：8000">
+    <p class="muted" style="margin-top:8px">100円につき1ポイント付与＋スタンプ1個を押印します。</p>
+    <div class="row" style="margin-top:16px">
+      <button class="btn" style="flex:1" onclick="confirmVisited('${resId}')">来店済みにする</button>
+      <button class="btn ghost" onclick="closeModal()">戻る</button>
+    </div>`);
+};
+window.confirmVisited = resId => {
+  const amount = Number($("#vsAmount").value);
+  if(!amount || amount <= 0){ toast("お会計金額を入力してください"); return; }
+  const r = db.reservations.find(x => x.id === resId);
+  r.status = "visited";
+  const result = recordVisit(r.userId, r.storeId, r.date, r.time, amount);
+  closeModal();
+  toast(result && result.stampCoupon ? "来店処理完了！スタンプ10個達成でクーポンを自動発行しました" : "来店済みにしました（ポイント・スタンプ付与済み）");
+  render();
+};
+window.adCancelRes = id => {
+  db.reservations.find(r => r.id === id).status = "cancelled";
+  saveDB(); toast("予約を取り消しました"); render();
+};
+
+/* ---------- 顧客管理 ---------- */
+function aCust(){
+  const q = state.custQ || "";
+  const customers = db.users.filter(u => u.role === "customer")
+    .filter(u => !q || u.name.includes(q) || (u.phone||"").includes(q) || (u.email||"").includes(q))
+    .sort((a,b)=>(b.createdAt||"").localeCompare(a.createdAt||""));
+  const today = todayStr();
+  return `
+    <h2>顧客管理</h2>
+    <div class="card">
+      <input placeholder="🔍 名前・電話番号・メールで検索" value="${esc(q)}" oninput="state.custQ=this.value;render();this.focus();this.setSelectionRange(this.value.length,this.value.length)">
+    </div>
+    <div class="card tbl-wrap">
+      <table class="tbl">
+        <tr><th>顧客名</th><th>登録日</th><th>お気に入り</th><th>ポイント</th><th>スタンプ</th><th>来店回数</th><th>最終来店</th><th></th></tr>
+        ${customers.map(u => {
+          const last = lastVisitOf(u.id);
+          const n = db.visits.filter(v => v.userId === u.id).length;
+          return `<tr>
+            <td><b>${esc(u.name)}</b><div class="muted">${esc(u.email||u.loginId)}</div></td>
+            <td>${fmtD(u.createdAt)}</td>
+            <td>${u.favStore ? esc(store(u.favStore).name.replace("焼肉 誠 ","")) : "-"}</td>
+            <td>${(u.points||0).toLocaleString()}pt</td>
+            <td>${u.stamps||0}/10</td>
+            <td>${n}回</td>
+            <td>${last ? `${fmtD(last)} <span class="muted">(${daysBetween(last,today)}日前)</span>` : "-"}</td>
+            <td><button class="btn small ghost" onclick="openCust('${u.id}')">詳細</button></td>
+          </tr>`; }).join("")}
+      </table>
+    </div>
+  `;
+}
+window.openCust = id => {
+  const u = db.users.find(x => x.id === id);
+  const visits = db.visits.filter(v => v.userId === id).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,6);
+  const ucs = db.userCoupons.filter(c => c.userId === id).slice(-5).reverse();
+  modal(`<h3>👤 ${esc(u.name)} 様</h3>
+    <table class="info-tbl">
+      <tr><th>メール</th><td>${esc(u.email||"-")}</td></tr>
+      <tr><th>電話</th><td>${esc(u.phone||"-")}</td></tr>
+      <tr><th>生年月日</th><td>${esc(u.birth||"-")}　${esc(u.gender||"")}</td></tr>
+      <tr><th>ポイント</th><td>${(u.points||0).toLocaleString()}pt ／ スタンプ ${u.stamps||0}/10</td></tr>
+      <tr><th>紹介コード</th><td>${esc(u.refCode||"-")}</td></tr>
+    </table>
+    <div class="sec-title">来店履歴</div>
+    ${visits.map(v => `<div class="list-item"><span>${fmtD(v.date)} ${esc(store(v.storeId).name.replace("焼肉 誠 ",""))}</span><span>${yen(v.amount)}</span></div>`).join("") || `<p class="muted">来店履歴なし</p>`}
+    <div class="sec-title">保有クーポン</div>
+    ${ucs.map(uc => `<div class="list-item"><span>${esc(coupon(uc.couponId).title)}</span><span class="tag ${uc.used?'':'green'}">${uc.used?"利用済":"未使用"}</span></div>`).join("") || `<p class="muted">クーポンなし</p>`}
+    <div class="sec-title">来店を手動登録</div>
+    <div class="grid2">
+      <div><label>店舗</label><select id="mvStore">${db.stores.map(s => `<option value="${s.id}">${esc(s.name.replace("焼肉 誠 ",""))}</option>`).join("")}</select></div>
+      <div><label>お会計金額</label><input id="mvAmount" type="number" step="100" placeholder="5000"></div>
+    </div>
+    <div class="row" style="margin-top:14px">
+      <button class="btn" style="flex:1" onclick="manualVisit('${id}')">来店を記録（pt・スタンプ付与）</button>
+      <button class="btn ghost" onclick="closeModal()">閉じる</button>
+    </div>`);
+};
+window.manualVisit = id => {
+  const amount = Number($("#mvAmount").value);
+  if(!amount || amount <= 0){ toast("お会計金額を入力してください"); return; }
+  const result = recordVisit(id, $("#mvStore").value, todayStr(), "18:00", amount);
+  closeModal();
+  toast(result && result.stampCoupon ? "来店記録完了！スタンプ10個達成クーポンを発行しました" : "来店を記録しました");
+  render();
+};
+
+/* ---------- クーポン管理 ---------- */
+function aCoup(){
+  const typeLabel = { auto_signup:"自動（初回登録）", auto_birthday:"自動（誕生日月）", auto_stamp:"自動（スタンプ達成）", auto_referral:"自動（紹介）", public:"アプリで配布" };
+  return `
+    <h2>クーポン管理</h2>
+    <div class="card">
+      <b style="font-size:13px;color:var(--gold2)">新しいクーポンを発行</b>
+      <div class="grid2">
+        <div><label>クーポン名</label><input id="cpTitle" placeholder="例：お久しぶりクーポン"></div>
+        <div><label>特典内容</label><input id="cpBene" placeholder="例：お会計から10%OFF"></div>
+      </div>
+      <label>利用条件</label><input id="cpCond" placeholder="例：60日以上ご来店のないお客様限定">
+      <div class="grid2">
+        <div><label>有効期限（日数）</label><input id="cpDays" type="number" value="30"></div>
+        <div><label>種別</label><select id="cpType">
+          <option value="public">アプリで配布（お客様が取得）</option>
+          <option value="target">ターゲット配信（下の配信を使用）</option>
+        </select></div>
+      </div>
+      <div style="margin-top:14px"><button class="btn" onclick="saveCoupon()">クーポンを作成</button></div>
+    </div>
+    <div class="card">
+      <b style="font-size:13px;color:var(--gold2)">ターゲット配信（プッシュ通知つき）</b>
+      <p class="muted" style="margin-top:6px;line-height:1.7">閑散日対策・休眠顧客の掘り起こし・3店舗間の相互送客に使います。対象の顧客へクーポンを直接配布し、プッシュ通知を送信します。</p>
+      <div class="grid2">
+        <div><label>配布するクーポン</label><select id="dsCoupon">
+          ${db.coupons.filter(c => c.active).map(c => `<option value="${c.id}">${esc(c.title)}（${esc(c.benefit)}）</option>`).join("")}</select></div>
+        <div><label>配信対象</label><select id="dsTarget">
+          <option value="all">全会員</option>
+          <option value="inactive30">30日以上来店なし</option>
+          <option value="inactive60">60日以上来店なし</option>
+          <option value="birthday">今月誕生日の会員</option>
+          ${db.stores.map(s => `<option value="fav_${s.id}">お気に入りが${esc(s.name.replace("焼肉 誠 ",""))}の会員</option>`).join("")}
+          ${db.stores.map(s => `<option value="cross_${s.id}">${esc(s.name.replace("焼肉 誠 ",""))}以外がお気に入りの会員（相互送客）</option>`).join("")}
+        </select></div>
+      </div>
+      <label>プッシュ通知メッセージ</label>
+      <input id="dsMsg" placeholder="例：そろそろ焼肉はいかがですか？500円OFFクーポンをお届けしました！">
+      <div style="margin-top:14px"><button class="btn" onclick="distCoupon()">この条件で配信する</button></div>
+    </div>
+    <div class="card tbl-wrap">
+      <table class="tbl">
+        <tr><th>クーポン名</th><th>特典</th><th>条件</th><th>種別</th><th>有効日数</th><th>発行数</th><th>利用数</th><th>状態</th><th></th></tr>
+        ${db.coupons.map(c => {
+          const issued = db.userCoupons.filter(uc => uc.couponId === c.id).length;
+          const used = db.userCoupons.filter(uc => uc.couponId === c.id && uc.used).length;
+          return `<tr>
+            <td><b>${esc(c.title)}</b></td>
+            <td>${esc(c.benefit)}</td>
+            <td class="muted">${esc(c.cond)}</td>
+            <td>${typeLabel[c.type] || "ターゲット配信"}</td>
+            <td>${c.days}日</td>
+            <td>${issued}枚</td>
+            <td>${used}枚</td>
+            <td><span class="tag ${c.active?'green':'red'}">${c.active?"有効":"停止中"}</span></td>
+            <td><button class="btn small ghost" onclick="toggleCoupon('${c.id}')">${c.active?"停止":"再開"}</button></td>
+          </tr>`; }).join("")}
+      </table>
+    </div>
+  `;
+}
+window.saveCoupon = () => {
+  const title = $("#cpTitle").value.trim(), bene = $("#cpBene").value.trim();
+  if(!title || !bene){ toast("クーポン名と特典内容を入力してください"); return; }
+  db.coupons.push({ id:uid("c"), title, benefit:bene, cond:$("#cpCond").value.trim(),
+    type:$("#cpType").value, days:Number($("#cpDays").value) || 30, active:true });
+  saveDB(); toast("クーポンを作成しました"); render();
+};
+window.toggleCoupon = id => { const c = coupon(id); c.active = !c.active; saveDB(); render(); };
+window.distCoupon = () => {
+  const cid = $("#dsCoupon").value, target = $("#dsTarget").value, msg = $("#dsMsg").value.trim();
+  const today = todayStr(); const month = new Date().getMonth() + 1;
+  let targets = db.users.filter(u => u.role === "customer");
+  if(target === "inactive30" || target === "inactive60"){
+    const th = target === "inactive30" ? 30 : 60;
+    targets = targets.filter(u => { const last = lastVisitOf(u.id); return last && daysBetween(last, today) >= th; });
+  }else if(target === "birthday"){
+    targets = targets.filter(u => u.birth && Number(u.birth.slice(5,7)) === month);
+  }else if(target.startsWith("fav_")){
+    targets = targets.filter(u => u.favStore === target.slice(4));
+  }else if(target.startsWith("cross_")){
+    targets = targets.filter(u => u.favStore && u.favStore !== target.slice(6));
+  }
+  if(!targets.length){ toast("配信対象の会員がいません"); return; }
+  targets.forEach(u => issueCoupon(u.id, cid));
+  const c = coupon(cid);
+  pushMsg(msg || `🎫 ${c.title}が届きました！`, `${c.benefit}／${c.cond}。クーポン画面をご確認ください。`);
+  saveDB(); toast(`${targets.length}名にクーポンを配信しました（プッシュ通知送信済み）`); render();
+};
+
+/* ---------- メニュー管理 ---------- */
+function aMenu(){
+  const cats = [...new Set(db.menus.map(m => m.cat))];
+  return `
+    <h2>メニュー管理</h2>
+    <div class="card">
+      <b style="font-size:13px;color:var(--gold2)">メニューを追加</b>
+      <div class="grid2">
+        <div><label>メニュー名</label><input id="mnName" placeholder="例：厚切り上タン塩"></div>
+        <div><label>価格（円）</label><input id="mnPrice" type="number" placeholder="1580"></div>
+      </div>
+      <div class="grid2">
+        <div><label>カテゴリー</label><select id="mnCat">${cats.map(c => `<option>${esc(c)}</option>`).join("")}</select></div>
+        <div><label>絵文字（写真の代わり）</label><input id="mnEmoji" placeholder="🥩" value="🥩"></div>
+      </div>
+      <label>説明</label><input id="mnDesc" placeholder="例：数量限定の希少部位">
+      <div class="row" style="margin-top:12px">
+        <label style="margin:0" class="row"><input type="checkbox" id="mnRec" style="width:auto;margin-right:6px">おすすめに表示</label>
+      </div>
+      <div style="margin-top:14px"><button class="btn" onclick="saveMenu()">追加する</button></div>
+    </div>
+    <div class="card tbl-wrap">
+      <table class="tbl">
+        <tr><th></th><th>メニュー名</th><th>カテゴリー</th><th>価格</th><th>おすすめ</th><th>人気順</th><th></th></tr>
+        ${db.menus.map(m => `
+          <tr>
+            <td style="font-size:20px">${m.emoji}</td>
+            <td><b>${esc(m.name)}</b><div class="muted">${esc(m.desc)}</div></td>
+            <td>${esc(m.cat)}</td>
+            <td>${yen(m.price)}</td>
+            <td>${m.rec ? `<span class="tag">おすすめ</span>` : ""}</td>
+            <td>${m.pop ? m.pop + "位" : "-"}</td>
+            <td><button class="btn small danger" onclick="delMenu('${m.id}')">削除</button></td>
+          </tr>`).join("")}
+      </table>
+    </div>
+  `;
+}
+window.saveMenu = () => {
+  const name = $("#mnName").value.trim(), price = Number($("#mnPrice").value);
+  if(!name || !price){ toast("メニュー名と価格を入力してください"); return; }
+  db.menus.push({ id:uid("m"), cat:$("#mnCat").value, name, price,
+    desc:$("#mnDesc").value.trim(), emoji:$("#mnEmoji").value || "🍖", rec:$("#mnRec").checked, pop:0 });
+  saveDB(); toast("メニューを追加しました"); render();
+};
+window.delMenu = id => { db.menus = db.menus.filter(m => m.id !== id); saveDB(); toast("メニューを削除しました"); render(); };
+
+/* ---------- 店舗管理 ---------- */
+function aStore(){
+  return `
+    <h2>店舗管理</h2>
+    ${db.stores.map(s => `
+      <div class="card">
+        <b style="font-size:14px;color:var(--gold2)">${s.emoji} ${esc(s.name)}</b>
+        <div class="grid2">
+          <div><label>住所</label><input id="st_${s.id}_address" value="${esc(s.address)}"></div>
+          <div><label>電話番号</label><input id="st_${s.id}_tel" value="${esc(s.tel)}"></div>
+        </div>
+        <div class="grid2">
+          <div><label>営業時間</label><input id="st_${s.id}_hours" value="${esc(s.hours)}"></div>
+          <div><label>定休日</label><input id="st_${s.id}_closed" value="${esc(s.closed)}"></div>
+        </div>
+        <div class="grid2">
+          <div><label>駐車場</label><input id="st_${s.id}_parking" value="${esc(s.parking)}"></div>
+          <div><label>アクセス</label><input id="st_${s.id}_access" value="${esc(s.access)}"></div>
+        </div>
+        <label>店舗紹介文</label><input id="st_${s.id}_feature" value="${esc(s.feature)}">
+        <div style="margin-top:12px"><button class="btn small" onclick="saveStore('${s.id}')">保存する</button></div>
+      </div>`).join("")}
+  `;
+}
+window.saveStore = id => {
+  const s = store(id);
+  ["address","tel","hours","closed","parking","access","feature"].forEach(k => {
+    s[k] = $("#st_" + id + "_" + k).value.trim();
+  });
+  saveDB(); toast(s.name + " の情報を保存しました");
+};
+
+/* ---------- お知らせ・キャンペーン ---------- */
+function aNews(){
+  return `
+    <h2>お知らせ・キャンペーン</h2>
+    <div class="card">
+      <b style="font-size:13px;color:var(--gold2)">新規投稿</b>
+      <div class="grid2">
+        <div><label>種別</label><select id="nwKind"><option>お知らせ</option><option>キャンペーン</option><option>新メニュー</option><option>イベント</option></select></div>
+        <div><label>掲載日</label><input id="nwDate" type="date" value="${todayStr()}"></div>
+      </div>
+      <label>タイトル</label><input id="nwTitle" placeholder="例：年末年始の営業時間について">
+      <label>本文</label><textarea id="nwBody" rows="3"></textarea>
+      <div style="margin-top:14px"><button class="btn" onclick="saveNews()">投稿する（ホーム画面に表示）</button></div>
+    </div>
+    <div class="card tbl-wrap">
+      <table class="tbl">
+        <tr><th>掲載日</th><th>種別</th><th>タイトル</th><th></th></tr>
+        ${db.news.map(n => `
+          <tr>
+            <td>${fmtD(n.date)}</td>
+            <td><span class="tag ${n.kind==='キャンペーン'?'red':''}">${esc(n.kind)}</span></td>
+            <td><b>${esc(n.title)}</b><div class="muted">${esc(n.body)}</div></td>
+            <td><button class="btn small danger" onclick="delNews('${n.id}')">削除</button></td>
+          </tr>`).join("")}
+      </table>
+    </div>
+  `;
+}
+window.saveNews = () => {
+  const title = $("#nwTitle").value.trim();
+  if(!title){ toast("タイトルを入力してください"); return; }
+  db.news.unshift({ id:uid("n"), kind:$("#nwKind").value, title, body:$("#nwBody").value.trim(), date:$("#nwDate").value || todayStr() });
+  db.news.sort((a,b)=>b.date.localeCompare(a.date));
+  saveDB(); toast("投稿しました"); render();
+};
+window.delNews = id => { db.news = db.news.filter(n => n.id !== id); saveDB(); toast("削除しました"); render(); };
+
+/* ---------- プッシュ通知 ---------- */
+function aPush(){
+  return `
+    <h2>プッシュ通知</h2>
+    <p class="muted" style="margin-bottom:14px">全アプリ会員のスマートフォンに通知を送ります（プロトタイプ版ではアプリ内の🔔通知として届きます）。</p>
+    <div class="card">
+      <b style="font-size:13px;color:var(--gold2)">通知を送信</b>
+      <label>タイトル</label><input id="phTitle" placeholder="例：本日は肉の日！">
+      <label>本文</label><textarea id="phBody" rows="2" placeholder="例：アプリ会員限定で黒毛和牛カルビ20%OFF！"></textarea>
+      <div style="margin-top:14px"><button class="btn" onclick="sendPush()">全会員に送信する</button></div>
+    </div>
+    <div class="sec-title">送信履歴</div>
+    <div class="card">
+      ${db.pushes.map(p => `
+        <div style="padding:10px 0;border-bottom:1px solid var(--line)">
+          <div class="muted">${fmtD(p.date)}</div>
+          <b style="font-size:13px">${esc(p.title)}</b>
+          <div class="muted" style="margin-top:2px">${esc(p.body)}</div>
+        </div>`).join("") || `<p class="muted">送信履歴はありません</p>`}
+    </div>
+  `;
+}
+window.sendPush = () => {
+  const title = $("#phTitle").value.trim();
+  if(!title){ toast("タイトルを入力してください"); return; }
+  pushMsg(title, $("#phBody").value.trim());
+  saveDB(); toast("全会員にプッシュ通知を送信しました"); render();
+};
+
+/* ---------- 起動 ---------- */
+loadDB();
+render();
+</script>
+</body>
+</html>
