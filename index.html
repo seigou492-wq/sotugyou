@@ -4,220 +4,332 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>永瀬美容室 予約・顧客管理</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Cormorant+Garamond:ital,wght@1,500&display=swap" rel="stylesheet">
 <style>
   :root{
-    --main:#8a6d5c;
-    --main-dark:#6b5344;
-    --accent:#c9a227;
-    --bg:#f7f4f0;
-    --card:#ffffff;
-    --text:#3b3230;
-    --muted:#9b8f89;
-    --line:#e6ddd6;
-    --danger:#c0564f;
-    --ok:#4f8a5b;
-    --radius:14px;
-    --shadow:0 4px 16px rgba(80,60,45,.10);
+    --ink:#463b31;
+    --brown:#7c6250;
+    --brown-dark:#5f4a3a;
+    --gold:#a8845c;
+    --gold-soft:#c9ae87;
+    --bg:#f6f1e7;
+    --card:#fffdf9;
+    --muted:#a5988a;
+    --line:#e7ddcc;
+    --danger:#b3564e;
+    --ok:#5b8a63;
+    --serif:"Shippori Mincho","Yu Mincho","Hiragino Mincho ProN",serif;
+    --radius:16px;
+    --shadow:0 6px 24px rgba(120,95,70,.10);
   }
   *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
   body{
-    font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic UI","Meiryo",sans-serif;
+    font-family:var(--serif);
     background:var(--bg);
-    color:var(--text);
+    color:var(--ink);
     min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  body::before{
+    content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+    background:
+      radial-gradient(720px 420px at 88% -8%, rgba(214,190,160,.35), transparent 65%),
+      radial-gradient(640px 460px at -10% 108%, rgba(196,170,138,.30), transparent 62%),
+      linear-gradient(160deg,#f8f4ec 0%,#f4eee1 60%,#efe6d6 100%);
   }
   button{font-family:inherit;cursor:pointer;}
-  input,select,textarea{font-family:inherit;font-size:15px;}
+  input,select,textarea{font-family:inherit;font-size:15px;color:var(--ink);}
+  svg.ic{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.6;
+    stroke-linecap:round;stroke-linejoin:round;vertical-align:-3px;}
 
   /* ===== 共通部品 ===== */
   .btn{
-    display:inline-block;border:none;border-radius:10px;
-    padding:11px 20px;font-size:15px;font-weight:600;
-    background:var(--main);color:#fff;transition:.15s;
+    display:inline-flex;align-items:center;gap:8px;justify-content:center;
+    border:none;border-radius:10px;
+    padding:12px 26px;font-size:14px;font-weight:600;letter-spacing:.12em;
+    background:linear-gradient(135deg,#83654e,#a1815f);color:#fdf9f2;transition:.18s;
+    box-shadow:0 3px 12px rgba(110,85,60,.25);
   }
-  .btn:hover{background:var(--main-dark);}
-  .btn.sub{background:#fff;color:var(--main);border:1.5px solid var(--main);}
-  .btn.sub:hover{background:#f3ece6;}
-  .btn.danger{background:var(--danger);}
-  .btn.danger:hover{background:#a34039;}
-  .btn.small{padding:6px 12px;font-size:13px;border-radius:8px;}
-  .btn:disabled{opacity:.45;cursor:not-allowed;}
+  .btn:hover{background:linear-gradient(135deg,#6e5440,#8a6d4f);transform:translateY(-1px);}
+  .btn.sub{background:#fffdf9;color:var(--brown);border:1px solid var(--gold-soft);box-shadow:none;}
+  .btn.sub:hover{background:#f6efe3;transform:none;}
+  .btn.danger{background:linear-gradient(135deg,#a3524a,#bc6f66);}
+  .btn.danger:hover{background:linear-gradient(135deg,#8e4038,#a35a51);}
+  .btn.small{padding:7px 14px;font-size:12px;border-radius:8px;letter-spacing:.08em;}
+  .btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
   .card{
     background:var(--card);border-radius:var(--radius);
-    box-shadow:var(--shadow);padding:22px;
+    box-shadow:var(--shadow);border:1px solid rgba(231,221,204,.6);padding:24px;
   }
   .field{margin-bottom:16px;}
-  .field label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:6px;}
+  .field label{display:block;font-size:12px;font-weight:600;color:var(--muted);
+    letter-spacing:.08em;margin-bottom:6px;}
   .field input,.field select,.field textarea{
-    width:100%;padding:11px 12px;border:1.5px solid var(--line);
+    width:100%;padding:12px 13px;border:1px solid var(--line);
     border-radius:10px;background:#fff;outline:none;transition:.15s;
   }
-  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--main);}
-  .badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;}
-  .badge.active{background:#e8f1ea;color:var(--ok);}
-  .badge.cancelled{background:#f7e6e5;color:var(--danger);}
-  .badge.done{background:#efe9e2;color:var(--main-dark);}
-  .badge.admin{background:#f5edd6;color:#8a7014;}
+  .field input:focus,.field select:focus,.field textarea:focus{
+    border-color:var(--gold);box-shadow:0 0 0 3px rgba(168,132,92,.12);}
+  .field input:disabled{background:#f4efe6;color:var(--muted);}
+  .badge{display:inline-block;padding:3px 12px;border-radius:999px;font-size:11px;
+    font-weight:600;letter-spacing:.06em;}
+  .badge.active{background:#e9f1e9;color:var(--ok);}
+  .badge.cancelled{background:#f6e7e5;color:var(--danger);}
+  .badge.done{background:#efe8db;color:var(--brown-dark);}
+  .badge.admin{background:#f2e8d2;color:#8d6f31;}
   .muted{color:var(--muted);font-size:13px;}
   .empty{
-    text-align:center;color:var(--muted);padding:40px 10px;
-    border:1.5px dashed var(--line);border-radius:var(--radius);
+    text-align:center;color:var(--muted);padding:46px 10px;letter-spacing:.05em;
+    border:1px dashed var(--gold-soft);border-radius:var(--radius);background:rgba(255,253,249,.5);
   }
-  h2.page-title{font-size:20px;margin-bottom:4px;}
-  p.page-sub{color:var(--muted);font-size:13px;margin-bottom:18px;}
+
+  /* ページ見出し（透かし文字付き） */
+  .page-head{position:relative;margin-bottom:24px;padding-top:14px;}
+  .page-head .watermark{
+    position:absolute;top:-14px;left:-6px;z-index:0;pointer-events:none;user-select:none;
+    font-family:"Cormorant Garamond",serif;font-style:italic;font-weight:500;
+    font-size:64px;line-height:1;color:rgba(160,128,88,.13);letter-spacing:.04em;
+  }
+  h2.page-title{position:relative;font-size:26px;letter-spacing:.14em;font-weight:600;}
+  p.page-sub{position:relative;color:var(--muted);font-size:13px;letter-spacing:.06em;margin-top:8px;}
 
   /* ===== ログイン画面 ===== */
   #login-screen{
-    min-height:100vh;display:flex;align-items:center;justify-content:center;
-    background:linear-gradient(150deg,#8a6d5c 0%,#a98d78 55%,#c9b6a4 100%);
-    padding:20px;
+    min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
   }
   .login-box{
-    width:100%;max-width:400px;background:#fff;
-    border-radius:20px;box-shadow:0 12px 40px rgba(50,35,25,.30);
-    padding:38px 32px;
+    width:100%;max-width:420px;background:rgba(255,253,249,.92);
+    border:1px solid rgba(201,174,135,.4);
+    border-radius:22px;box-shadow:0 18px 60px rgba(110,85,60,.18);
+    padding:44px 38px;backdrop-filter:blur(6px);
   }
-  .login-logo{text-align:center;margin-bottom:26px;}
+  .login-logo{text-align:center;margin-bottom:30px;}
   .login-logo .mark{
-    width:64px;height:64px;margin:0 auto 12px;border-radius:50%;
-    background:var(--main);color:#fff;font-size:30px;
+    width:72px;height:72px;margin:0 auto 14px;border-radius:50%;
+    border:1.5px solid var(--gold);color:var(--gold);font-size:28px;
     display:flex;align-items:center;justify-content:center;
+    box-shadow:inset 0 0 0 3px #fffdf9, inset 0 0 0 4.5px rgba(168,132,92,.35);
   }
-  .login-logo h1{font-size:22px;letter-spacing:.06em;}
-  .login-logo p{color:var(--muted);font-size:13px;margin-top:4px;}
+  .login-logo h1{font-size:24px;letter-spacing:.3em;text-indent:.3em;font-weight:600;}
+  .login-logo .en{
+    color:var(--gold);font-size:10px;letter-spacing:.42em;text-indent:.42em;
+    margin-top:6px;font-family:"Cormorant Garamond",serif;font-style:italic;
+  }
+  .login-logo p.sys{color:var(--muted);font-size:12px;letter-spacing:.2em;margin-top:10px;}
   .login-error{
-    display:none;background:#f7e6e5;color:var(--danger);
+    display:none;background:#f6e7e5;color:var(--danger);
     font-size:13px;padding:10px 12px;border-radius:8px;margin-bottom:14px;
   }
   .login-hint{
-    margin-top:20px;padding:12px;border-radius:10px;
-    background:var(--bg);font-size:12px;color:var(--muted);line-height:1.7;
+    margin-top:22px;padding:14px;border-radius:10px;border:1px dashed var(--gold-soft);
+    background:rgba(246,241,231,.7);font-size:12px;color:var(--muted);line-height:1.9;letter-spacing:.04em;
   }
 
   /* ===== アプリ本体レイアウト ===== */
   #app{display:none;}
   header.appbar{
-    background:#fff;border-bottom:1px solid var(--line);
-    padding:0 20px;height:58px;
+    background:rgba(255,253,249,.88);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+    padding:0 26px;height:74px;
     display:flex;align-items:center;justify-content:space-between;
     position:sticky;top:0;z-index:20;
   }
-  .appbar .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;}
+  .appbar .brand{display:flex;align-items:center;gap:14px;}
   .appbar .brand .mark{
-    width:34px;height:34px;border-radius:50%;background:var(--main);
-    color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;
+    width:46px;height:46px;border-radius:50%;flex:none;
+    border:1.3px solid var(--gold);color:var(--gold);font-size:19px;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:inset 0 0 0 2.5px #fffdf9, inset 0 0 0 3.8px rgba(168,132,92,.35);
   }
-  .appbar .userinfo{display:flex;align-items:center;gap:12px;font-size:13px;}
+  .appbar .brand .tx b{display:block;font-size:19px;letter-spacing:.22em;font-weight:600;}
+  .appbar .brand .tx span{
+    display:block;color:var(--gold);font-size:9px;letter-spacing:.34em;margin-top:2px;
+    font-family:"Cormorant Garamond",serif;
+  }
+  .appbar .userinfo{display:flex;align-items:center;gap:16px;font-size:13px;letter-spacing:.08em;}
   nav.tabs{
-    background:#fff;border-bottom:1px solid var(--line);
-    display:flex;gap:4px;padding:0 14px;overflow-x:auto;
-    position:sticky;top:58px;z-index:19;
+    background:rgba(255,253,249,.85);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+    display:flex;gap:10px;padding:0 20px;overflow-x:auto;
+    position:sticky;top:74px;z-index:19;
   }
   nav.tabs button{
-    background:none;border:none;padding:13px 16px;font-size:14px;font-weight:600;
-    color:var(--muted);border-bottom:3px solid transparent;white-space:nowrap;
+    background:none;border:none;padding:17px 18px;font-size:14px;font-weight:600;
+    letter-spacing:.12em;color:var(--muted);border-bottom:2px solid transparent;
+    white-space:nowrap;display:flex;align-items:center;gap:8px;transition:.15s;
   }
-  nav.tabs button.on{color:var(--main-dark);border-bottom-color:var(--main);}
-  main.content{max-width:960px;margin:0 auto;padding:24px 16px 60px;}
+  nav.tabs button:hover{color:var(--brown);}
+  nav.tabs button.on{color:var(--brown-dark);border-bottom-color:var(--gold);}
+  main.content{max-width:1080px;margin:0 auto;padding:34px 22px 70px;}
   .view{display:none;}
   .view.on{display:block;}
 
-  /* ===== 予約ウィザード ===== */
-  .steps{display:flex;gap:6px;margin-bottom:20px;}
+  /* ===== 予約ウィザード：矢印型ステップバー ===== */
+  .steps{display:flex;margin:6px 0 34px;filter:drop-shadow(0 2px 8px rgba(120,95,70,.10));}
   .steps .st{
-    flex:1;text-align:center;font-size:12px;font-weight:600;color:var(--muted);
-    padding:8px 4px;border-radius:8px;background:#efe9e2;
+    flex:1;display:flex;align-items:center;justify-content:center;gap:10px;
+    font-size:13px;font-weight:600;letter-spacing:.14em;color:#a99b89;
+    padding:15px 10px 15px 26px;background:#f4eddf;position:relative;
+    clip-path:polygon(0 0, calc(100% - 17px) 0, 100% 50%, calc(100% - 17px) 100%, 0 100%, 17px 50%);
+    margin-left:-9px;
   }
-  .steps .st.on{background:var(--main);color:#fff;}
-  .steps .st.donez{background:#d9cbbd;color:var(--main-dark);}
-  .choice-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;}
+  .steps .st:first-child{
+    clip-path:polygon(0 0, calc(100% - 17px) 0, 100% 50%, calc(100% - 17px) 100%, 0 100%);
+    border-radius:999px 0 0 999px;margin-left:0;padding-left:18px;
+  }
+  .steps .st:last-child{
+    clip-path:polygon(0 0, 100% 0, 100% 100%, 0 100%, 17px 50%);
+    border-radius:0 999px 999px 0;
+  }
+  .steps .st .stn{
+    width:26px;height:26px;border-radius:50%;flex:none;
+    display:flex;align-items:center;justify-content:center;
+    font-size:13px;background:#fff;color:#a99b89;border:1px solid #ddd0bb;
+  }
+  .steps .st.on{
+    background:linear-gradient(135deg,#7b5f4a,#96775a);color:#fdf9f2;
+  }
+  .steps .st.on .stn{background:#fdf9f2;color:var(--brown-dark);border-color:transparent;}
+  .steps .st.donez{background:#dfd2bd;color:#6f5b47;}
+  .steps .st.donez .stn{background:rgba(255,255,255,.75);color:#6f5b47;border-color:transparent;}
+  @media(max-width:640px){
+    .steps .st{font-size:0;gap:0;}       /* スマホでは番号のみ */
+    .steps .st .stn{font-size:12px;}
+  }
+
+  .choice-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px;}
   .choice{
-    border:2px solid var(--line);border-radius:12px;padding:16px;background:#fff;
-    cursor:pointer;transition:.15s;
+    border:1px solid var(--line);border-radius:18px;padding:20px;background:var(--card);
+    cursor:pointer;transition:.18s;box-shadow:var(--shadow);position:relative;
   }
-  .choice:hover{border-color:#cbb7a6;}
-  .choice.sel{border-color:var(--main);background:#faf5ef;}
-  .choice .nm{font-weight:700;margin-bottom:4px;}
-  .choice .ds{font-size:12px;color:var(--muted);line-height:1.6;}
-  .wiz-nav{display:flex;justify-content:space-between;margin-top:22px;}
+  .choice:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(120,95,70,.16);}
+  .choice.sel{border-color:var(--gold);background:#fbf6ec;
+    box-shadow:0 0 0 2px rgba(168,132,92,.35), var(--shadow);}
+  .choice .nm{font-weight:600;font-size:17px;letter-spacing:.12em;margin-bottom:5px;}
+  .choice .ds{font-size:12px;color:var(--muted);line-height:1.8;letter-spacing:.04em;}
+
+  /* スタイリストカード（写真つき） */
+  .choice.stylist{text-align:center;padding:30px 20px 26px;}
+  .choice.stylist .face,
+  .choice.stylist .face-fb{
+    width:116px;height:116px;border-radius:50%;object-fit:cover;margin:0 auto 16px;
+    box-shadow:0 0 0 4px #fffdf9, 0 0 0 5.5px rgba(201,174,135,.55), 0 6px 18px rgba(120,95,70,.18);
+    display:block;
+  }
+  .choice.stylist .face-fb{
+    display:none;align-items:center;justify-content:center;
+    background:linear-gradient(135deg,#eadfca,#dfcfb2);
+    color:#8a6d4f;font-size:38px;font-weight:600;
+  }
+  .cbadge{
+    position:absolute;top:14px;right:14px;width:36px;height:36px;border-radius:50%;
+    background:#f4ecdc;color:var(--gold);display:flex;align-items:center;justify-content:center;
+    border:1px solid rgba(201,174,135,.4);
+  }
+  .cbadge svg{width:17px;height:17px;}
+
+  .wiz-nav{display:flex;justify-content:space-between;margin-top:30px;}
 
   /* ===== カレンダー ===== */
-  .cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
-  .cal-head .ym{font-weight:700;font-size:16px;}
+  .cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+  .cal-head .ym{font-weight:600;font-size:17px;letter-spacing:.14em;}
   table.cal{width:100%;border-collapse:collapse;table-layout:fixed;}
-  table.cal th{font-size:12px;color:var(--muted);padding:6px 0;font-weight:600;}
-  table.cal th.sun{color:var(--danger);}
-  table.cal th.sat{color:#4a6fa5;}
+  table.cal th{font-size:11px;color:var(--muted);padding:7px 0;font-weight:600;letter-spacing:.1em;}
+  table.cal th.sun{color:#bd7a74;}
+  table.cal th.sat{color:#7e93ad;}
   table.cal td{
-    height:52px;text-align:center;vertical-align:middle;border:1px solid var(--line);
-    font-size:14px;background:#fff;
+    height:54px;text-align:center;vertical-align:middle;border:1px solid #efe7d7;
+    font-size:14px;background:#fffdf9;transition:.12s;
   }
   table.cal td.pick{cursor:pointer;}
-  table.cal td.pick:hover{background:#f3ece6;}
-  table.cal td.sel{background:var(--main);color:#fff;font-weight:700;}
-  table.cal td.off{background:#f4f1ed;color:#cfc6bf;}
-  table.cal td .cnt{display:block;font-size:10px;color:var(--accent);font-weight:700;}
-  table.cal td.sel .cnt{color:#ffe9a8;}
-  .slot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px;margin-top:14px;}
+  table.cal td.pick:hover{background:#f4ecdc;}
+  table.cal td.sel{background:linear-gradient(135deg,#7b5f4a,#96775a);color:#fdf9f2;font-weight:600;}
+  table.cal td.off{background:#f3eee3;color:#cec2ad;}
+  table.cal td .cnt{display:block;font-size:10px;color:var(--gold);font-weight:600;}
+  table.cal td.sel .cnt{color:#f2e2c4;}
+  .slot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(86px,1fr));gap:9px;margin-top:16px;}
   .slot{
-    border:1.5px solid var(--line);border-radius:8px;padding:9px 0;text-align:center;
-    font-size:14px;font-weight:600;background:#fff;cursor:pointer;transition:.12s;
+    border:1px solid var(--line);border-radius:9px;padding:10px 0;text-align:center;
+    font-size:14px;font-weight:600;letter-spacing:.06em;background:#fffdf9;cursor:pointer;transition:.12s;
   }
-  .slot:hover{border-color:#cbb7a6;}
-  .slot.sel{background:var(--main);border-color:var(--main);color:#fff;}
-  .slot.ng{background:#f4f1ed;color:#cfc6bf;cursor:not-allowed;border-color:var(--line);}
+  .slot:hover{border-color:var(--gold-soft);background:#faf5ea;}
+  .slot.sel{background:linear-gradient(135deg,#7b5f4a,#96775a);border-color:transparent;color:#fdf9f2;}
+  .slot.ng{background:#f3eee3;color:#cec2ad;cursor:not-allowed;}
 
   /* ===== 一覧・テーブル ===== */
   .list-item{
-    background:#fff;border-radius:12px;box-shadow:var(--shadow);
-    padding:16px 18px;margin-bottom:12px;
+    background:var(--card);border-radius:14px;box-shadow:var(--shadow);
+    border:1px solid rgba(231,221,204,.6);
+    padding:18px 20px;margin-bottom:13px;
     display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;align-items:center;
   }
   .list-item .info{flex:1;min-width:230px;}
-  .list-item .info .ttl{font-weight:700;margin-bottom:3px;}
-  .list-item .info .sb{font-size:13px;color:var(--muted);line-height:1.7;}
+  .list-item .info .ttl{font-weight:600;letter-spacing:.06em;margin-bottom:4px;}
+  .list-item .info .sb{font-size:13px;color:var(--muted);line-height:1.8;letter-spacing:.03em;}
   .list-item .acts{display:flex;gap:8px;flex-wrap:wrap;}
-  table.plain{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;box-shadow:var(--shadow);}
-  table.plain th{background:#efe9e2;font-size:13px;padding:10px 12px;text-align:left;color:var(--main-dark);}
-  table.plain td{padding:11px 12px;border-top:1px solid var(--line);font-size:14px;vertical-align:middle;}
-  .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px;}
-  .toolbar input[type=text],.toolbar input[type=date],.toolbar select{
-    padding:9px 12px;border:1.5px solid var(--line);border-radius:10px;background:#fff;outline:none;
+  table.plain{
+    width:100%;border-collapse:collapse;background:var(--card);border-radius:14px;
+    overflow:hidden;box-shadow:var(--shadow);border:1px solid rgba(231,221,204,.6);
   }
+  table.plain th{
+    background:#efe7d5;font-size:12px;padding:12px 14px;text-align:left;
+    color:var(--brown-dark);letter-spacing:.1em;font-weight:600;
+  }
+  table.plain td{padding:12px 14px;border-top:1px solid #f0e8d8;font-size:14px;vertical-align:middle;}
+  .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:18px;}
+  .toolbar input[type=text],.toolbar input[type=date],.toolbar select{
+    padding:10px 13px;border:1px solid var(--line);border-radius:10px;background:#fffdf9;outline:none;
+  }
+  .toolbar input:focus,.toolbar select:focus{border-color:var(--gold);}
 
   /* ===== モーダル ===== */
   .modal-bg{
-    display:none;position:fixed;inset:0;background:rgba(45,32,25,.45);
+    display:none;position:fixed;inset:0;background:rgba(60,45,32,.5);backdrop-filter:blur(3px);
     z-index:50;align-items:center;justify-content:center;padding:18px;
   }
   .modal-bg.on{display:flex;}
   .modal{
-    background:#fff;border-radius:16px;max-width:520px;width:100%;
-    max-height:88vh;overflow-y:auto;padding:26px;box-shadow:0 14px 44px rgba(40,28,20,.35);
+    background:var(--card);border-radius:18px;max-width:540px;width:100%;
+    max-height:88vh;overflow-y:auto;padding:30px;
+    border:1px solid rgba(201,174,135,.35);
+    box-shadow:0 18px 60px rgba(50,36,24,.4);
   }
-  .modal h3{margin-bottom:16px;font-size:17px;}
-  .modal .m-acts{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;}
+  .modal h3{margin-bottom:18px;font-size:18px;letter-spacing:.14em;font-weight:600;}
+  .modal .m-acts{display:flex;justify-content:flex-end;gap:10px;margin-top:22px;}
 
   /* ===== トースト ===== */
   #toast{
-    position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(80px);
-    background:var(--main-dark);color:#fff;padding:12px 22px;border-radius:999px;
-    font-size:14px;font-weight:600;box-shadow:var(--shadow);
+    position:fixed;left:50%;bottom:30px;transform:translateX(-50%) translateY(80px);
+    background:#5f4a3a;color:#fdf9f2;padding:13px 26px;border-radius:999px;
+    font-size:14px;letter-spacing:.08em;box-shadow:0 8px 30px rgba(60,45,30,.35);
     opacity:0;transition:.3s;z-index:99;pointer-events:none;white-space:nowrap;
   }
   #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  #toast.err{background:var(--danger);}
 
   /* ===== ダッシュボード ===== */
-  .stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px;}
-  .stat{background:#fff;border-radius:12px;box-shadow:var(--shadow);padding:16px;}
-  .stat .lb{font-size:12px;color:var(--muted);font-weight:600;}
-  .stat .vl{font-size:26px;font-weight:700;color:var(--main-dark);margin-top:2px;}
+  .stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:24px;}
+  .stat{
+    background:var(--card);border-radius:14px;box-shadow:var(--shadow);
+    border:1px solid rgba(231,221,204,.6);padding:18px;
+  }
+  .stat .lb{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.14em;}
+  .stat .vl{font-size:28px;font-weight:600;color:var(--brown-dark);margin-top:4px;}
   .stat .vl small{font-size:13px;font-weight:600;color:var(--muted);}
 
+  h3.sec{font-size:16px;letter-spacing:.14em;font-weight:600;}
+
   @media(max-width:600px){
-    .login-box{padding:30px 22px;}
-    main.content{padding:18px 12px 60px;}
+    .login-box{padding:34px 24px;}
+    header.appbar{padding:0 16px;height:64px;}
+    nav.tabs{top:64px;}
+    main.content{padding:22px 14px 60px;}
     table.cal td{height:46px;font-size:13px;}
+    .page-head .watermark{font-size:46px;}
+    h2.page-title{font-size:21px;}
   }
 </style>
 </head>
@@ -229,7 +341,8 @@
     <div class="login-logo">
       <div class="mark">✂</div>
       <h1>永瀬美容室</h1>
-      <p>予約・顧客管理システム</p>
+      <div class="en">NAGASE BEAUTY SALON</div>
+      <p class="sys">予約・顧客管理システム</p>
     </div>
     <div class="login-error" id="login-error">IDまたはパスワードが違います</div>
     <form id="login-form" autocomplete="off">
@@ -241,7 +354,7 @@
         <label>パスワード</label>
         <input type="password" id="login-pw" placeholder="パスワード" required>
       </div>
-      <button type="submit" class="btn" style="width:100%;margin-top:6px;">ログイン</button>
+      <button type="submit" class="btn" style="width:100%;margin-top:8px;">ログイン</button>
     </form>
     <div class="login-hint">
       【テスト用アカウント】<br>
@@ -254,7 +367,10 @@
 <!-- ================= アプリ本体 ================= -->
 <div id="app">
   <header class="appbar">
-    <div class="brand"><span class="mark">✂</span>永瀬美容室</div>
+    <div class="brand">
+      <span class="mark">✂</span>
+      <span class="tx"><b>永瀬美容室</b><span>NAGASE BEAUTY SALON</span></span>
+    </div>
     <div class="userinfo">
       <span id="user-label"></span>
       <button class="btn sub small" onclick="logout()">ログアウト</button>
@@ -276,15 +392,29 @@
 <script>
 "use strict";
 /* =====================================================
-   永瀬美容室 予約・顧客管理アプリ
+   永瀬美容室 予約・顧客管理アプリ（localStorage版プロトタイプ）
    - データは localStorage に保存（DBの代わり）
-   - 将来的に PWA / サーバDB へ移行する前提の構成
+   - 実用版は salon/ フォルダの PHP + MySQL 版を参照
    ===================================================== */
 
 const STORE_KEY = "nagase_salon_db_v1";
 const OPEN_HOUR = 10, CLOSE_HOUR = 19;   // 営業 10:00〜19:00（最終受付は施術時間による）
 const SLOT_MIN = 30;                      // 30分刻み
 const CLOSED_WEEKDAY = 2;                 // 火曜定休
+
+/* ---------- アイコン（インラインSVG） ---------- */
+const IC = {
+  calendar: '<svg class="ic" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg>',
+  doc:      '<svg class="ic" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>',
+  clock:    '<svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>',
+  person:   '<svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 5-6 8-6s6.5 2 8 6"/></svg>',
+  people:   '<svg class="ic" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1.2-3.4 4-5 6.5-5s5.3 1.6 6.5 5"/><circle cx="17" cy="9" r="2.8"/><path d="M15.5 15.2c2.6.2 4.9 1.7 6 4.8"/></svg>',
+  grid:     '<svg class="ic" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="5" rx="1.5"/><rect x="13" y="10" width="8" height="11" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/></svg>',
+  scissors: '<svg class="ic" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.6"/><circle cx="6" cy="18" r="2.6"/><path d="M8.2 7.6 20 19M8.2 16.4 20 5"/></svg>',
+  crown:    '<svg class="ic" viewBox="0 0 24 24"><path d="M3 17 4.5 7l4.8 4L12 5l2.7 6 4.8-4L21 17z"/><path d="M4.5 20h15"/></svg>',
+  brush:    '<svg class="ic" viewBox="0 0 24 24"><path d="M14 3l7 7-8.5 8.5a3 3 0 0 1-4.2 0l-2.8-2.8a3 3 0 0 1 0-4.2z"/><path d="M7 21l-4 0 0-4"/></svg>'
+};
+const STYLIST_BADGES = [IC.crown, IC.scissors, IC.brush];
 
 /* ---------- 初期データ ---------- */
 function defaultDB(){
@@ -341,15 +471,16 @@ function jpDate(iso){
   const w = "日月火水木金土"[new Date(y, m-1, d).getDay()];
   return `${y}年${m}月${d}日(${w})`;
 }
-function yen(n){ return "¥" + Number(n).toLocaleString(); }
+function yen(n){ return "¥" + Number(n||0).toLocaleString(); }
 function timeToMin(t){ const [h,m] = t.split(":").map(Number); return h*60+m; }
 function minToTime(min){ return pad2(Math.floor(min/60)) + ":" + pad2(min%60); }
-function toast(msg){
+function toast(msg, isErr){
   const t = $("#toast");
   t.textContent = msg;
+  t.classList.toggle("err", !!isErr);
   t.classList.add("show");
   clearTimeout(t._tm);
-  t._tm = setTimeout(()=>t.classList.remove("show"), 2400);
+  t._tm = setTimeout(()=>t.classList.remove("show"), 2600);
 }
 function statusBadge(st){
   return st === "active"    ? '<span class="badge active">予約中</span>'
@@ -361,7 +492,19 @@ function getStylist(id){ return DB.stylists.find(s => s.id === id); }
 function getMenu(id){ return DB.menus.find(m => m.id === id); }
 function userName(id){ const u = getUser(id); return u ? u.name : "(削除済み)"; }
 function stylistName(id){ const s = getStylist(id); return s ? s.name : "(削除済み)"; }
-function menuLabel(id){ const m = getMenu(id); return m ? `${m.name}（${m.minutes}分 / ${yen(m.price)}）` : "(削除済み)"; }
+
+/* ページ見出し（英字の透かし付き） */
+function pageHead(wm, title, sub){
+  return `<div class="page-head"><span class="watermark">${wm}</span>
+    <h2 class="page-title">${title}</h2>${sub ? `<p class="page-sub">${sub}</p>` : ""}</div>`;
+}
+
+/* スタイリストの顔写真（img/stylist{番号}.jpg が無ければイニシャル表示） */
+function faceHTML(s, idx){
+  return `<img class="face" src="img/stylist${idx+1}.jpg" alt="${esc(s.name)}"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="face-fb">${esc(String(s.name).charAt(0))}</div>`;
+}
 
 /* ---------- モーダル ---------- */
 function openModal(html){
@@ -419,17 +562,17 @@ function enterApp(){
    タブ構築（権限で出し分け）
    ===================================================== */
 const CUSTOMER_TABS = [
-  { key:"book",    label:"新規予約",   render: renderBooking },
-  { key:"mylist",  label:"予約の確認", render: renderMyReservations },
-  { key:"history", label:"施術履歴",   render: renderMyHistory },
-  { key:"mypage",  label:"マイページ", render: renderMyPage }
+  { key:"book",    label:"新規予約",   icon:IC.calendar, render: renderBooking },
+  { key:"mylist",  label:"予約の確認", icon:IC.doc,      render: renderMyReservations },
+  { key:"history", label:"施術履歴",   icon:IC.clock,    render: renderMyHistory },
+  { key:"mypage",  label:"マイページ", icon:IC.person,   render: renderMyPage }
 ];
 const ADMIN_TABS = [
-  { key:"dash",      label:"ダッシュボード", render: renderDashboard },
-  { key:"resv",      label:"予約管理",       render: renderAdminReservations },
-  { key:"customers", label:"顧客管理",       render: renderCustomers },
-  { key:"records",   label:"施術履歴",       render: renderAdminHistory },
-  { key:"master",    label:"メニュー/担当",  render: renderMaster }
+  { key:"dash",      label:"ダッシュボード", icon:IC.grid,     render: renderDashboard },
+  { key:"resv",      label:"予約管理",       icon:IC.calendar, render: renderAdminReservations },
+  { key:"customers", label:"顧客管理",       icon:IC.people,   render: renderCustomers },
+  { key:"records",   label:"施術履歴",       icon:IC.clock,    render: renderAdminHistory },
+  { key:"master",    label:"メニュー/担当",  icon:IC.scissors, render: renderMaster }
 ];
 
 function tabsFor(){ return session.role === "admin" ? ADMIN_TABS : CUSTOMER_TABS; }
@@ -437,7 +580,7 @@ function tabsFor(){ return session.role === "admin" ? ADMIN_TABS : CUSTOMER_TABS
 function buildTabs(){
   const tabs = tabsFor();
   $("#tabs").innerHTML = tabs.map(t =>
-    `<button data-tab="${t.key}" onclick="switchTab('${t.key}')">${t.label}</button>`
+    `<button data-tab="${t.key}" onclick="switchTab('${t.key}')">${t.icon}<span>${t.label}</span></button>`
   ).join("");
   $("#views").innerHTML = tabs.map(t => `<section class="view" id="view-${t.key}"></section>`).join("");
   switchTab(tabs[0].key);
@@ -490,7 +633,6 @@ function isClosedDay(dateObj){ return dateObj.getDay() === CLOSED_WEEKDAY; }
 
 /* =====================================================
    月間カレンダー描画（共通部品）
-   opts: {year,month, selDate, minDate, onPick(iso), countOf(iso), navId}
    ===================================================== */
 function calendarHTML(opts){
   const { year, month } = opts;
@@ -516,7 +658,7 @@ function calendarHTML(opts){
     const cnt = opts.countOf ? opts.countOf(iso) : 0;
     const cntHtml = cnt > 0 ? `<span class="cnt">${cnt}件</span>` : "";
     if(tooOld || closed){
-      html += `<td class="off">${d}${closed ? "<span class='cnt' style='color:#cfc6bf'>定休</span>" : ""}</td>`;
+      html += `<td class="off">${d}${closed ? "<span class='cnt' style='color:#cec2ad'>定休</span>" : ""}</td>`;
     }else{
       const sel = opts.selDate === iso ? " sel" : "";
       html += `<td class="pick${sel}" onclick="${opts.onPick}('${iso}')">${d}${cntHtml}</td>`;
@@ -540,29 +682,27 @@ function renderBooking(el){
   }
   const stepNames = ["担当者", "メニュー", "日時", "確認"];
   const stepsHtml = `<div class="steps">` + stepNames.map((s,i) =>
-    `<div class="st ${i===wiz.step?"on":(i<wiz.step?"donez":"")}">${i+1}. ${s}</div>`).join("") + `</div>`;
+    `<div class="st ${i===wiz.step?"on":(i<wiz.step?"donez":"")}"><span class="stn">${i+1}</span>${s}</div>`).join("") + `</div>`;
 
   let body = "";
   if(wiz.step === 0){
-    body = `
-      <h2 class="page-title">担当スタイリストを選択</h2>
-      <p class="page-sub">ご希望の担当者をお選びください。</p>
+    body = pageHead("Stylist", "担当スタイリストを選択", "ご希望の担当者をお選びください。") + `
       <div class="choice-grid">
-        ${DB.stylists.map(s => `
-          <div class="choice ${wiz.stylistId===s.id?"sel":""}" onclick="wizPickStylist('${s.id}')">
-            <div class="nm">💇 ${esc(s.name)}</div>
+        ${DB.stylists.map((s,i) => `
+          <div class="choice stylist ${wiz.stylistId===s.id?"sel":""}" onclick="wizPickStylist('${s.id}')">
+            <span class="cbadge">${STYLIST_BADGES[i % STYLIST_BADGES.length]}</span>
+            ${faceHTML(s, i)}
+            <div class="nm">${esc(s.name)}</div>
             <div class="ds">${esc(s.title)}</div>
           </div>`).join("")}
       </div>
       <div class="wiz-nav">
         <span></span>
-        <button class="btn" onclick="wizNext()" ${wiz.stylistId?"":"disabled"}>次へ ▶</button>
+        <button class="btn" onclick="wizNext()" ${wiz.stylistId?"":"disabled"}>次へ<span style="font-family:sans-serif;">›</span></button>
       </div>`;
   }
   else if(wiz.step === 1){
-    body = `
-      <h2 class="page-title">メニューを選択</h2>
-      <p class="page-sub">担当：${esc(stylistName(wiz.stylistId))}</p>
+    body = pageHead("Menu", "メニューを選択", `担当：${esc(stylistName(wiz.stylistId))}`) + `
       <div class="choice-grid">
         ${DB.menus.map(m => `
           <div class="choice ${wiz.menuId===m.id?"sel":""}" onclick="wizPickMenu('${m.id}')">
@@ -571,13 +711,13 @@ function renderBooking(el){
           </div>`).join("")}
       </div>
       <div class="wiz-nav">
-        <button class="btn sub" onclick="wizBack()">◀ 戻る</button>
-        <button class="btn" onclick="wizNext()" ${wiz.menuId?"":"disabled"}>次へ ▶</button>
+        <button class="btn sub" onclick="wizBack()"><span style="font-family:sans-serif;">‹</span>戻る</button>
+        <button class="btn" onclick="wizNext()" ${wiz.menuId?"":"disabled"}>次へ<span style="font-family:sans-serif;">›</span></button>
       </div>`;
   }
   else if(wiz.step === 2){
     const slotsHtml = wiz.date ? `
-      <h3 style="margin:18px 0 4px;font-size:15px;">${jpDate(wiz.date)} の空き時間</h3>
+      <h3 class="sec" style="margin:22px 0 6px;">${jpDate(wiz.date)} の空き時間</h3>
       <p class="muted">グレーの時間帯はご予約いただけません（所要時間：約${getMenu(wiz.menuId).minutes}分）</p>
       <div class="slot-grid">
         ${availableSlots(wiz.stylistId, wiz.date, wiz.menuId).map(s =>
@@ -585,26 +725,23 @@ function renderBooking(el){
             ? `<div class="slot ${wiz.time===s.time?"sel":""}" onclick="wizPickTime('${s.time}')">${s.time}</div>`
             : `<div class="slot ng">${s.time}</div>`
         ).join("")}
-      </div>` : `<p class="muted" style="margin-top:14px;">カレンダーから日付を選択してください。</p>`;
-    body = `
-      <h2 class="page-title">日時を選択</h2>
-      <p class="page-sub">担当：${esc(stylistName(wiz.stylistId))} ／ ${esc(getMenu(wiz.menuId).name)}　※火曜定休</p>
-      <div class="card" style="padding:16px;">
+      </div>` : `<p class="muted" style="margin-top:16px;">カレンダーから日付を選択してください。</p>`;
+    body = pageHead("Date", "日時を選択",
+        `担当：${esc(stylistName(wiz.stylistId))} ／ ${esc(getMenu(wiz.menuId).name)}　※火曜定休`) + `
+      <div class="card" style="padding:18px;">
         ${calendarHTML({ year:wiz.calY, month:wiz.calM, selDate:wiz.date, minDate:todayStr(), onPick:"wizPickDate", navId:"wizCalNav" })}
       </div>
       ${slotsHtml}
       <div class="wiz-nav">
-        <button class="btn sub" onclick="wizBack()">◀ 戻る</button>
-        <button class="btn" onclick="wizNext()" ${wiz.date && wiz.time ? "" : "disabled"}>次へ ▶</button>
+        <button class="btn sub" onclick="wizBack()"><span style="font-family:sans-serif;">‹</span>戻る</button>
+        <button class="btn" onclick="wizNext()" ${wiz.date && wiz.time ? "" : "disabled"}>次へ<span style="font-family:sans-serif;">›</span></button>
       </div>`;
   }
   else {
     const m = getMenu(wiz.menuId);
-    body = `
-      <h2 class="page-title">予約内容の確認</h2>
-      <p class="page-sub">内容をご確認のうえ「予約を確定する」を押してください。</p>
+    body = pageHead("Confirm", "予約内容の確認", "内容をご確認のうえ「予約を確定する」を押してください。") + `
       <div class="card">
-        <table style="width:100%;border-collapse:collapse;font-size:15px;line-height:2.2;">
+        <table style="width:100%;border-collapse:collapse;font-size:15px;line-height:2.3;">
           <tr><td class="muted" style="width:110px;">お名前</td><td><b>${esc(session.name)} 様</b></td></tr>
           <tr><td class="muted">担当</td><td>${esc(stylistName(wiz.stylistId))}</td></tr>
           <tr><td class="muted">メニュー</td><td>${esc(m.name)}（約${m.minutes}分）</td></tr>
@@ -613,7 +750,7 @@ function renderBooking(el){
         </table>
       </div>
       <div class="wiz-nav">
-        <button class="btn sub" onclick="wizBack()">◀ 戻る</button>
+        <button class="btn sub" onclick="wizBack()"><span style="font-family:sans-serif;">‹</span>戻る</button>
         <button class="btn" onclick="wizConfirm()">予約を確定する</button>
       </div>`;
   }
@@ -636,7 +773,7 @@ function wizConfirm(){
   // 直前の空き再チェック（他の予約と衝突していないか）
   const slot = availableSlots(wiz.stylistId, wiz.date, wiz.menuId).find(s => s.time === wiz.time);
   if(!slot || !slot.ok){
-    toast("申し訳ありません。その時間は埋まってしまいました。");
+    toast("申し訳ありません。その時間は埋まってしまいました。", true);
     wiz.time = null; wiz.step = 2; refresh();
     return;
   }
@@ -683,11 +820,9 @@ function renderMyReservations(el){
     </div>`;
   };
 
-  el.innerHTML = `
-    <h2 class="page-title">ご予約の確認</h2>
-    <p class="page-sub">これからのご予約の変更・キャンセルができます。</p>
+  el.innerHTML = pageHead("Reservation", "ご予約の確認", "これからのご予約の変更・キャンセルができます。") + `
     ${upcoming.length ? upcoming.map(r => item(r, true)).join("") : `<div class="empty">現在、ご予約はありません。<br>「新規予約」からご予約いただけます。</div>`}
-    ${others.length ? `<h3 style="margin:26px 0 12px;font-size:15px;color:var(--muted);">過去の予約・キャンセル履歴</h3>${others.map(r => item(r, false)).join("")}` : ""}
+    ${others.length ? `<h3 class="sec" style="margin:30px 0 14px;color:var(--muted);">過去の予約・キャンセル履歴</h3>${others.map(r => item(r, false)).join("")}` : ""}
   `;
 }
 
@@ -718,7 +853,7 @@ function openChangeResv(id){
   const r = DB.reservations.find(x => x.id === id);
   if(!r) return;
   const n = new Date();
-  Object.assign(chg, { resvId:id, date:r.date, time:null, calY:n.getFullYear(), calM:n.getMonth() });
+  Object.assign(chg, { resvId:id, date:r.date >= todayStr() ? r.date : null, time:null, calY:n.getFullYear(), calM:n.getMonth() });
   renderChangeModal();
 }
 function chgCalNav(d){
@@ -751,7 +886,7 @@ function doChangeResv(){
   const r = DB.reservations.find(x => x.id === chg.resvId);
   if(!r) return;
   const slot = availableSlots(r.stylistId, chg.date, r.menuId, r.id).find(s => s.time === chg.time);
-  if(!slot || !slot.ok){ toast("その時間は埋まってしまいました"); return; }
+  if(!slot || !slot.ok){ toast("その時間は埋まってしまいました", true); return; }
   r.date = chg.date; r.time = chg.time; r.updatedAt = new Date().toISOString();
   saveDB();
   closeModal();
@@ -766,9 +901,7 @@ function renderMyHistory(el){
   const list = DB.histories
     .filter(h => h.userId === session.id)
     .sort((a,b) => b.date.localeCompare(a.date));
-  el.innerHTML = `
-    <h2 class="page-title">施術履歴</h2>
-    <p class="page-sub">これまでの施術内容の記録です。</p>
+  el.innerHTML = pageHead("History", "施術履歴", "これまでの施術内容の記録です。") + `
     ${list.length ? list.map(h => `
       <div class="list-item">
         <div class="info">
@@ -784,10 +917,8 @@ function renderMyHistory(el){
    【お客様】マイページ
    ===================================================== */
 function renderMyPage(el){
-  el.innerHTML = `
-    <h2 class="page-title">マイページ</h2>
-    <p class="page-sub">会員情報の確認・変更ができます。</p>
-    <div class="card" style="max-width:480px;">
+  el.innerHTML = pageHead("My Page", "マイページ", "会員情報の確認・変更ができます。") + `
+    <div class="card" style="max-width:500px;">
       <div class="field"><label>会員ID</label><input value="${esc(session.id)}" disabled></div>
       <div class="field"><label>お名前</label><input id="mp-name" value="${esc(session.name)}"></div>
       <div class="field"><label>フリガナ</label><input id="mp-kana" value="${esc(session.kana||"")}"></div>
@@ -801,8 +932,8 @@ function saveMyPage(){
   const u = getUser(session.id);
   const name = $("#mp-name").value.trim();
   const pw = $("#mp-pw").value;
-  if(!name){ toast("お名前を入力してください"); return; }
-  if(!pw){ toast("パスワードを入力してください"); return; }
+  if(!name){ toast("お名前を入力してください", true); return; }
+  if(!pw){ toast("パスワードを入力してください", true); return; }
   Object.assign(u, {
     name, kana: $("#mp-kana").value.trim(),
     phone: $("#mp-phone").value.trim(),
@@ -811,7 +942,8 @@ function saveMyPage(){
   });
   session = u;
   saveDB();
-  $("#user-label").innerHTML = `${esc(session.name)} 様 `;
+  const roleLabel = session.role === "admin" ? '<span class="badge admin">管理者</span>' : "";
+  $("#user-label").innerHTML = `${esc(session.name)} 様 ${roleLabel}`;
   toast("会員情報を保存しました");
 }
 
@@ -827,16 +959,14 @@ function renderDashboard(el){
   const monthDone = DB.histories.filter(h => h.date.startsWith(monthPrefix));
   const monthSales = monthDone.reduce((s,h) => s + (h.price||0), 0);
 
-  el.innerHTML = `
-    <h2 class="page-title">ダッシュボード</h2>
-    <p class="page-sub">${jpDate(today)} の状況</p>
+  el.innerHTML = pageHead("Dashboard", "ダッシュボード", `${jpDate(today)} の状況`) + `
     <div class="stat-row">
       <div class="stat"><div class="lb">本日の予約</div><div class="vl">${todays.length}<small> 件</small></div></div>
       <div class="stat"><div class="lb">今後の予約合計</div><div class="vl">${future}<small> 件</small></div></div>
       <div class="stat"><div class="lb">登録顧客数</div><div class="vl">${customers}<small> 名</small></div></div>
-      <div class="stat"><div class="lb">今月の施術売上</div><div class="vl" style="font-size:20px;">${yen(monthSales)}</div></div>
+      <div class="stat"><div class="lb">今月の施術売上</div><div class="vl" style="font-size:21px;">${yen(monthSales)}</div></div>
     </div>
-    <h3 style="margin:8px 0 12px;font-size:16px;">本日の予約一覧</h3>
+    <h3 class="sec" style="margin:10px 0 14px;">本日の予約一覧</h3>
     ${todays.length ? todays.map(r => adminResvItem(r)).join("") : `<div class="empty">本日の予約はありません。</div>`}
   `;
 }
@@ -856,14 +986,12 @@ function renderAdminReservations(el){
   if(adm.filter !== "all") list = list.filter(r => r.status === adm.filter);
   list.sort((a,b) => a.time.localeCompare(b.time));
 
-  el.innerHTML = `
-    <h2 class="page-title">予約管理</h2>
-    <p class="page-sub">カレンダーの日付を選ぶと、その日の予約が表示されます。数字はその日の予約件数です。</p>
-    <div class="card" style="padding:16px;margin-bottom:18px;">
+  el.innerHTML = pageHead("Reservation", "予約管理", "カレンダーの日付を選ぶと、その日の予約が表示されます。数字はその日の予約件数です。") + `
+    <div class="card" style="padding:18px;margin-bottom:20px;">
       ${calendarHTML({ year:adm.calY, month:adm.calM, selDate:adm.selDate, onPick:"admPickDate", navId:"admCalNav", countOf })}
     </div>
     <div class="toolbar">
-      <b>${jpDate(adm.selDate)}</b>
+      <b style="letter-spacing:.08em;">${jpDate(adm.selDate)}</b>
       <select onchange="admSetFilter(this.value)">
         <option value="active" ${adm.filter==="active"?"selected":""}>予約中のみ</option>
         <option value="all" ${adm.filter==="all"?"selected":""}>すべて表示</option>
@@ -947,9 +1075,7 @@ function renderCustomers(el){
   const list = DB.users
     .filter(u => u.role === "customer")
     .filter(u => !q || u.id.includes(q) || u.name.includes(q) || (u.kana||"").includes(q) || (u.phone||"").includes(q));
-  el.innerHTML = `
-    <h2 class="page-title">顧客管理</h2>
-    <p class="page-sub">お客様アカウントの登録・編集・削除ができます。</p>
+  el.innerHTML = pageHead("Customer", "顧客管理", "お客様アカウントの登録・編集・削除ができます。") + `
     <div class="toolbar">
       <input type="text" placeholder="ID / 氏名 / フリガナ / 電話 で検索" value="${esc(custSearch)}"
         oninput="custSearch=this.value;refresh();" style="flex:1;min-width:200px;">
@@ -957,7 +1083,7 @@ function renderCustomers(el){
     </div>
     ${list.length ? `
     <table class="plain">
-      <tr><th>ID</th><th>氏名</th><th>電話番号</th><th>来店回数</th><th style="width:230px;"></th></tr>
+      <tr><th>ID</th><th>氏名</th><th>電話番号</th><th>来店回数</th><th style="width:240px;"></th></tr>
       ${list.map(u => {
         const visits = DB.histories.filter(h => h.userId === u.id).length;
         return `<tr>
@@ -997,8 +1123,8 @@ function saveCustomer(id){
   const newId = id || $("#cf-id").value.trim();
   const pw = $("#cf-pw").value;
   const name = $("#cf-name").value.trim();
-  if(!newId || !pw || !name){ toast("ID・パスワード・氏名は必須です"); return; }
-  if(!id && getUser(newId)){ toast("そのIDは既に使われています"); return; }
+  if(!newId || !pw || !name){ toast("ID・パスワード・氏名は必須です", true); return; }
+  if(!id && getUser(newId)){ toast("そのIDは既に使われています", true); return; }
   const data = {
     password: pw, name,
     kana: $("#cf-kana").value.trim(),
@@ -1052,9 +1178,9 @@ function openCustomerDetail(id){
       ID:${esc(u.id)} ／ TEL:${esc(u.phone||"-")} ／ ${esc(u.email||"-")}<br>
       ${u.note ? "メモ：" + esc(u.note) : ""}
     </p>
-    ${resv.length ? `<h4 style="font-size:14px;margin-bottom:8px;">今後の予約</h4>
+    ${resv.length ? `<h4 style="font-size:14px;margin-bottom:8px;letter-spacing:.1em;">今後の予約</h4>
       ${resv.map(r => `<p class="muted" style="margin-bottom:6px;">・${jpDate(r.date)} ${r.time}〜（${esc(stylistName(r.stylistId))}）</p>`).join("")}` : ""}
-    <h4 style="font-size:14px;margin:14px 0 8px;">施術履歴（${hist.length}件）</h4>
+    <h4 style="font-size:14px;margin:14px 0 8px;letter-spacing:.1em;">施術履歴（${hist.length}件）</h4>
     ${hist.length ? hist.map(h => `
       <div style="border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:13px;line-height:1.7;">
         <b>${jpDate(h.date)}</b>　${esc(h.menuName)}（${yen(h.price)}）／ 担当：${esc(h.stylistName)}
@@ -1088,7 +1214,7 @@ function saveHistory(){
   const userId = $("#hf-user").value;
   const date = $("#hf-date").value;
   const menuName = $("#hf-menu").value.trim();
-  if(!userId || !date || !menuName){ toast("お客様・施術日・メニューは必須です"); return; }
+  if(!userId || !date || !menuName){ toast("お客様・施術日・メニューは必須です", true); return; }
   DB.histories.push({
     id: nextId("h"),
     userId, date,
@@ -1113,9 +1239,7 @@ function renderAdminHistory(el){
   const list = DB.histories
     .filter(h => !q || userName(h.userId).includes(q) || h.menuName.includes(q) || h.date.includes(q))
     .sort((a,b) => b.date.localeCompare(a.date));
-  el.innerHTML = `
-    <h2 class="page-title">施術履歴</h2>
-    <p class="page-sub">全お客様の施術記録です。予約を「来店済み」にすると自動で登録されます。</p>
+  el.innerHTML = pageHead("History", "施術履歴", "全お客様の施術記録です。予約を「来店済み」にすると自動で登録されます。") + `
     <div class="toolbar">
       <input type="text" placeholder="氏名 / メニュー / 日付(YYYY-MM-DD) で検索" value="${esc(histSearch)}"
         oninput="histSearch=this.value;refresh();" style="flex:1;min-width:200px;">
@@ -1158,16 +1282,13 @@ function doDeleteHistory(id){
    【管理者】メニュー / スタイリスト管理
    ===================================================== */
 function renderMaster(el){
-  el.innerHTML = `
-    <h2 class="page-title">メニュー / 担当者の管理</h2>
-    <p class="page-sub">予約画面に表示されるメニューとスタイリストを管理します。</p>
-
+  el.innerHTML = pageHead("Menu", "メニュー / 担当者の管理", "予約画面に表示されるメニューとスタイリストを管理します。") + `
     <div class="toolbar" style="justify-content:space-between;">
-      <h3 style="font-size:16px;">施術メニュー</h3>
+      <h3 class="sec">施術メニュー</h3>
       <button class="btn small" onclick="openMenuForm()">＋ メニュー追加</button>
     </div>
-    <table class="plain" style="margin-bottom:30px;">
-      <tr><th>メニュー名</th><th>所要時間</th><th>料金</th><th style="width:140px;"></th></tr>
+    <table class="plain" style="margin-bottom:34px;">
+      <tr><th>メニュー名</th><th>所要時間</th><th>料金</th><th style="width:150px;"></th></tr>
       ${DB.menus.map(m => `<tr>
         <td><b>${esc(m.name)}</b></td><td>約${m.minutes}分</td><td>${yen(m.price)}</td>
         <td>
@@ -1178,11 +1299,11 @@ function renderMaster(el){
     </table>
 
     <div class="toolbar" style="justify-content:space-between;">
-      <h3 style="font-size:16px;">スタイリスト</h3>
+      <h3 class="sec">スタイリスト</h3>
       <button class="btn small" onclick="openStylistForm()">＋ スタイリスト追加</button>
     </div>
     <table class="plain">
-      <tr><th>氏名</th><th>肩書き</th><th style="width:140px;"></th></tr>
+      <tr><th>氏名</th><th>肩書き</th><th style="width:150px;"></th></tr>
       ${DB.stylists.map(s => `<tr>
         <td><b>${esc(s.name)}</b></td><td>${esc(s.title)}</td>
         <td>
@@ -1191,6 +1312,7 @@ function renderMaster(el){
         </td>
       </tr>`).join("")}
     </table>
+    <p class="muted" style="margin-top:14px;">※ スタイリストの写真は <b>img/stylist（上からの順番）.jpg</b> という名前で保存すると予約画面に表示されます。</p>
   `;
 }
 function openMenuForm(id){
@@ -1198,7 +1320,7 @@ function openMenuForm(id){
   openModal(`
     <h3>${m ? "メニューの編集" : "メニューの追加"}</h3>
     <div class="field"><label>メニュー名</label><input id="mf-name" value="${esc(m ? m.name : "")}"></div>
-    <div class="field"><label>所要時間（分・30分単位推奨）</label><input id="mf-min" type="number" step="15" value="${m ? m.minutes : 60}"></div>
+    <div class="field"><label>所要時間（分・15分単位）</label><input id="mf-min" type="number" step="15" value="${m ? m.minutes : 60}"></div>
     <div class="field"><label>料金（円・税込）</label><input id="mf-price" type="number" value="${m ? m.price : 0}"></div>
     <div class="m-acts">
       <button class="btn sub" onclick="closeModal()">戻る</button>
@@ -1209,13 +1331,13 @@ function saveMenu(id){
   const name = $("#mf-name").value.trim();
   const minutes = Number($("#mf-min").value);
   const price = Number($("#mf-price").value);
-  if(!name || !minutes){ toast("メニュー名と所要時間は必須です"); return; }
+  if(!name || !minutes){ toast("メニュー名と所要時間は必須です", true); return; }
   if(id){ Object.assign(getMenu(id), { name, minutes, price }); }
   else{ DB.menus.push({ id: nextId("m"), name, minutes, price }); }
   saveDB(); closeModal(); toast("メニューを保存しました"); refresh();
 }
 function deleteMenu(id){
-  if(activeResvs().some(r => r.menuId === id)){ toast("このメニューの予約が入っているため削除できません"); return; }
+  if(activeResvs().some(r => r.menuId === id)){ toast("このメニューの予約が入っているため削除できません", true); return; }
   DB.menus = DB.menus.filter(m => m.id !== id);
   saveDB(); toast("メニューを削除しました"); refresh();
 }
@@ -1232,13 +1354,13 @@ function openStylistForm(id){
 }
 function saveStylist(id){
   const name = $("#sf-name").value.trim();
-  if(!name){ toast("氏名は必須です"); return; }
+  if(!name){ toast("氏名は必須です", true); return; }
   if(id){ Object.assign(getStylist(id), { name, title: $("#sf-title").value.trim() }); }
   else{ DB.stylists.push({ id: nextId("s"), name, title: $("#sf-title").value.trim() }); }
   saveDB(); closeModal(); toast("スタイリストを保存しました"); refresh();
 }
 function deleteStylist(id){
-  if(activeResvs().some(r => r.stylistId === id)){ toast("このスタイリストの予約が入っているため削除できません"); return; }
+  if(activeResvs().some(r => r.stylistId === id)){ toast("このスタイリストの予約が入っているため削除できません", true); return; }
   DB.stylists = DB.stylists.filter(s => s.id !== id);
   saveDB(); toast("スタイリストを削除しました"); refresh();
 }
