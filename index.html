@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>永瀬美容室 予約・顧客管理</title>
+<style>
+  :root{
+    --main:#8a6d5c;
+    --main-dark:#6b5344;
+    --accent:#c9a227;
+    --bg:#f7f4f0;
+    --card:#ffffff;
+    --text:#3b3230;
+    --muted:#9b8f89;
+    --line:#e6ddd6;
+    --danger:#c0564f;
+    --ok:#4f8a5b;
+    --radius:14px;
+    --shadow:0 4px 16px rgba(80,60,45,.10);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic UI","Meiryo",sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+  }
+  button{font-family:inherit;cursor:pointer;}
+  input,select,textarea{font-family:inherit;font-size:15px;}
+
+  /* ===== 共通部品 ===== */
+  .btn{
+    display:inline-block;border:none;border-radius:10px;
+    padding:11px 20px;font-size:15px;font-weight:600;
+    background:var(--main);color:#fff;transition:.15s;
+  }
+  .btn:hover{background:var(--main-dark);}
+  .btn.sub{background:#fff;color:var(--main);border:1.5px solid var(--main);}
+  .btn.sub:hover{background:#f3ece6;}
+  .btn.danger{background:var(--danger);}
+  .btn.danger:hover{background:#a34039;}
+  .btn.small{padding:6px 12px;font-size:13px;border-radius:8px;}
+  .btn:disabled{opacity:.45;cursor:not-allowed;}
+  .card{
+    background:var(--card);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:22px;
+  }
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:6px;}
+  .field input,.field select,.field textarea{
+    width:100%;padding:11px 12px;border:1.5px solid var(--line);
+    border-radius:10px;background:#fff;outline:none;transition:.15s;
+  }
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--main);}
+  .badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;}
+  .badge.active{background:#e8f1ea;color:var(--ok);}
+  .badge.cancelled{background:#f7e6e5;color:var(--danger);}
+  .badge.done{background:#efe9e2;color:var(--main-dark);}
+  .badge.admin{background:#f5edd6;color:#8a7014;}
+  .muted{color:var(--muted);font-size:13px;}
+  .empty{
+    text-align:center;color:var(--muted);padding:40px 10px;
+    border:1.5px dashed var(--line);border-radius:var(--radius);
+  }
+  h2.page-title{font-size:20px;margin-bottom:4px;}
+  p.page-sub{color:var(--muted);font-size:13px;margin-bottom:18px;}
+
+  /* ===== ログイン画面 ===== */
+  #login-screen{
+    min-height:100vh;display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(150deg,#8a6d5c 0%,#a98d78 55%,#c9b6a4 100%);
+    padding:20px;
+  }
+  .login-box{
+    width:100%;max-width:400px;background:#fff;
+    border-radius:20px;box-shadow:0 12px 40px rgba(50,35,25,.30);
+    padding:38px 32px;
+  }
+  .login-logo{text-align:center;margin-bottom:26px;}
+  .login-logo .mark{
+    width:64px;height:64px;margin:0 auto 12px;border-radius:50%;
+    background:var(--main);color:#fff;font-size:30px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .login-logo h1{font-size:22px;letter-spacing:.06em;}
+  .login-logo p{color:var(--muted);font-size:13px;margin-top:4px;}
+  .login-error{
+    display:none;background:#f7e6e5;color:var(--danger);
+    font-size:13px;padding:10px 12px;border-radius:8px;margin-bottom:14px;
+  }
+  .login-hint{
+    margin-top:20px;padding:12px;border-radius:10px;
+    background:var(--bg);font-size:12px;color:var(--muted);line-height:1.7;
+  }
+
+  /* ===== アプリ本体レイアウト ===== */
+  #app{display:none;}
+  header.appbar{
+    background:#fff;border-bottom:1px solid var(--line);
+    padding:0 20px;height:58px;
+    display:flex;align-items:center;justify-content:space-between;
+    position:sticky;top:0;z-index:20;
+  }
+  .appbar .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;}
+  .appbar .brand .mark{
+    width:34px;height:34px;border-radius:50%;background:var(--main);
+    color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;
+  }
+  .appbar .userinfo{display:flex;align-items:center;gap:12px;font-size:13px;}
+  nav.tabs{
+    background:#fff;border-bottom:1px solid var(--line);
+    display:flex;gap:4px;padding:0 14px;overflow-x:auto;
+    position:sticky;top:58px;z-index:19;
+  }
+  nav.tabs button{
+    background:none;border:none;padding:13px 16px;font-size:14px;font-weight:600;
+    color:var(--muted);border-bottom:3px solid transparent;white-space:nowrap;
+  }
+  nav.tabs button.on{color:var(--main-dark);border-bottom-color:var(--main);}
+  main.content{max-width:960px;margin:0 auto;padding:24px 16px 60px;}
+  .view{display:none;}
+  .view.on{display:block;}
+
+  /* ===== 予約ウィザード ===== */
+  .steps{display:flex;gap:6px;margin-bottom:20px;}
+  .steps .st{
+    flex:1;text-align:center;font-size:12px;font-weight:600;color:var(--muted);
+    padding:8px 4px;border-radius:8px;background:#efe9e2;
+  }
+  .steps .st.on{background:var(--main);color:#fff;}
+  .steps .st.donez{background:#d9cbbd;color:var(--main-dark);}
+  .choice-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;}
+  .choice{
+    border:2px solid var(--line);border-radius:12px;padding:16px;background:#fff;
+    cursor:pointer;transition:.15s;
+  }
+  .choice:hover{border-color:#cbb7a6;}
+  .choice.sel{border-color:var(--main);background:#faf5ef;}
+  .choice .nm{font-weight:700;margin-bottom:4px;}
+  .choice .ds{font-size:12px;color:var(--muted);line-height:1.6;}
+  .wiz-nav{display:flex;justify-content:space-between;margin-top:22px;}
+
+  /* ===== カレンダー ===== */
+  .cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+  .cal-head .ym{font-weight:700;font-size:16px;}
+  table.cal{width:100%;border-collapse:collapse;table-layout:fixed;}
+  table.cal th{font-size:12px;color:var(--muted);padding:6px 0;font-weight:600;}
+  table.cal th.sun{color:var(--danger);}
+  table.cal th.sat{color:#4a6fa5;}
+  table.cal td{
+    height:52px;text-align:center;vertical-align:middle;border:1px solid var(--line);
+    font-size:14px;background:#fff;
+  }
+  table.cal td.pick{cursor:pointer;}
+  table.cal td.pick:hover{background:#f3ece6;}
+  table.cal td.sel{background:var(--main);color:#fff;font-weight:700;}
+  table.cal td.off{background:#f4f1ed;color:#cfc6bf;}
+  table.cal td .cnt{display:block;font-size:10px;color:var(--accent);font-weight:700;}
+  table.cal td.sel .cnt{color:#ffe9a8;}
+  .slot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px;margin-top:14px;}
+  .slot{
+    border:1.5px solid var(--line);border-radius:8px;padding:9px 0;text-align:center;
+    font-size:14px;font-weight:600;background:#fff;cursor:pointer;transition:.12s;
+  }
+  .slot:hover{border-color:#cbb7a6;}
+  .slot.sel{background:var(--main);border-color:var(--main);color:#fff;}
+  .slot.ng{background:#f4f1ed;color:#cfc6bf;cursor:not-allowed;border-color:var(--line);}
+
+  /* ===== 一覧・テーブル ===== */
+  .list-item{
+    background:#fff;border-radius:12px;box-shadow:var(--shadow);
+    padding:16px 18px;margin-bottom:12px;
+    display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;align-items:center;
+  }
+  .list-item .info{flex:1;min-width:230px;}
+  .list-item .info .ttl{font-weight:700;margin-bottom:3px;}
+  .list-item .info .sb{font-size:13px;color:var(--muted);line-height:1.7;}
+  .list-item .acts{display:flex;gap:8px;flex-wrap:wrap;}
+  table.plain{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;box-shadow:var(--shadow);}
+  table.plain th{background:#efe9e2;font-size:13px;padding:10px 12px;text-align:left;color:var(--main-dark);}
+  table.plain td{padding:11px 12px;border-top:1px solid var(--line);font-size:14px;vertical-align:middle;}
+  .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px;}
+  .toolbar input[type=text],.toolbar input[type=date],.toolbar select{
+    padding:9px 12px;border:1.5px solid var(--line);border-radius:10px;background:#fff;outline:none;
+  }
+
+  /* ===== モーダル ===== */
+  .modal-bg{
+    display:none;position:fixed;inset:0;background:rgba(45,32,25,.45);
+    z-index:50;align-items:center;justify-content:center;padding:18px;
+  }
+  .modal-bg.on{display:flex;}
+  .modal{
+    background:#fff;border-radius:16px;max-width:520px;width:100%;
+    max-height:88vh;overflow-y:auto;padding:26px;box-shadow:0 14px 44px rgba(40,28,20,.35);
+  }
+  .modal h3{margin-bottom:16px;font-size:17px;}
+  .modal .m-acts{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;}
+
+  /* ===== トースト ===== */
+  #toast{
+    position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(80px);
+    background:var(--main-dark);color:#fff;padding:12px 22px;border-radius:999px;
+    font-size:14px;font-weight:600;box-shadow:var(--shadow);
+    opacity:0;transition:.3s;z-index:99;pointer-events:none;white-space:nowrap;
+  }
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* ===== ダッシュボード ===== */
+  .stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px;}
+  .stat{background:#fff;border-radius:12px;box-shadow:var(--shadow);padding:16px;}
+  .stat .lb{font-size:12px;color:var(--muted);font-weight:600;}
+  .stat .vl{font-size:26px;font-weight:700;color:var(--main-dark);margin-top:2px;}
+  .stat .vl small{font-size:13px;font-weight:600;color:var(--muted);}
+
+  @media(max-width:600px){
+    .login-box{padding:30px 22px;}
+    main.content{padding:18px 12px 60px;}
+    table.cal td{height:46px;font-size:13px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= ログイン画面 ================= -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="mark">✂</div>
+      <h1>永瀬美容室</h1>
+      <p>予約・顧客管理システム</p>
+    </div>
+    <div class="login-error" id="login-error">IDまたはパスワードが違います</div>
+    <form id="login-form" autocomplete="off">
+      <div class="field">
+        <label>会員ID</label>
+        <input type="text" id="login-id" placeholder="例）000" required>
+      </div>
+      <div class="field">
+        <label>パスワード</label>
+        <input type="password" id="login-pw" placeholder="パスワード" required>
+      </div>
+      <button type="submit" class="btn" style="width:100%;margin-top:6px;">ログイン</button>
+    </form>
+    <div class="login-hint">
+      【テスト用アカウント】<br>
+      管理者：ID <b>123</b> ／ パスワード <b>123</b><br>
+      お客様：ID <b>000</b> ／ パスワード <b>000</b>
+    </div>
+  </div>
+</div>
+
+<!-- ================= アプリ本体 ================= -->
+<div id="app">
+  <header class="appbar">
+    <div class="brand"><span class="mark">✂</span>永瀬美容室</div>
+    <div class="userinfo">
+      <span id="user-label"></span>
+      <button class="btn sub small" onclick="logout()">ログアウト</button>
+    </div>
+  </header>
+
+  <nav class="tabs" id="tabs"></nav>
+
+  <main class="content" id="views"></main>
+</div>
+
+<!-- モーダル -->
+<div class="modal-bg" id="modal-bg">
+  <div class="modal" id="modal-body"></div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+"use strict";
+/* =====================================================
+   永瀬美容室 予約・顧客管理アプリ
+   - データは localStorage に保存（DBの代わり）
+   - 将来的に PWA / サーバDB へ移行する前提の構成
+   ===================================================== */
+
+const STORE_KEY = "nagase_salon_db_v1";
+const OPEN_HOUR = 10, CLOSE_HOUR = 19;   // 営業 10:00〜19:00（最終受付は施術時間による）
+const SLOT_MIN = 30;                      // 30分刻み
+const CLOSED_WEEKDAY = 2;                 // 火曜定休
+
+/* ---------- 初期データ ---------- */
+function defaultDB(){
+  return {
+    users: [
+      { id:"123", password:"123", role:"admin",    name:"永瀬 店長", kana:"ナガセ テンチョウ", phone:"", email:"", note:"管理者アカウント" },
+      { id:"000", password:"000", role:"customer", name:"山田 花子", kana:"ヤマダ ハナコ", phone:"090-0000-0000", email:"hanako@example.com", note:"テスト用のお客様アカウント" }
+    ],
+    stylists: [
+      { id:"s1", name:"永瀬 貴之", title:"店長 / トップスタイリスト" },
+      { id:"s2", name:"佐藤 美咲", title:"スタイリスト" },
+      { id:"s3", name:"田中 玲奈", title:"カラーリスト" }
+    ],
+    menus: [
+      { id:"m1", name:"カット",             price:4400, minutes:60 },
+      { id:"m2", name:"カット + カラー",     price:9900, minutes:120 },
+      { id:"m3", name:"カット + パーマ",     price:11000, minutes:150 },
+      { id:"m4", name:"カラーのみ",          price:7150, minutes:90 },
+      { id:"m5", name:"トリートメント",      price:3300, minutes:30 },
+      { id:"m6", name:"ヘッドスパ",          price:4950, minutes:45 }
+    ],
+    reservations: [],   // {id,userId,stylistId,menuId,date:"YYYY-MM-DD",time:"HH:MM",status:"active|cancelled|done",createdAt,updatedAt}
+    histories: [],      // {id,userId,date,stylistName,menuName,price,memo,createdAt}
+    seq: 1
+  };
+}
+
+let DB = loadDB();
+let session = null;          // ログイン中ユーザー
+let currentTab = null;
+
+function loadDB(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    if(raw){ return JSON.parse(raw); }
+  }catch(e){ console.warn("DB読込失敗。初期化します。", e); }
+  const db = defaultDB();
+  localStorage.setItem(STORE_KEY, JSON.stringify(db));
+  return db;
+}
+function saveDB(){ localStorage.setItem(STORE_KEY, JSON.stringify(DB)); }
+function nextId(prefix){ return prefix + (DB.seq++); }
+
+/* ---------- ユーティリティ ---------- */
+const $  = sel => document.querySelector(sel);
+const $$ = sel => document.querySelectorAll(sel);
+function esc(s){ return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function pad2(n){ return String(n).padStart(2,"0"); }
+function fmtDate(d){ return d.getFullYear() + "-" + pad2(d.getMonth()+1) + "-" + pad2(d.getDate()); }
+function todayStr(){ return fmtDate(new Date()); }
+function jpDate(iso){
+  if(!iso) return "";
+  const [y,m,d] = iso.split("-").map(Number);
+  const w = "日月火水木金土"[new Date(y, m-1, d).getDay()];
+  return `${y}年${m}月${d}日(${w})`;
+}
+function yen(n){ return "¥" + Number(n).toLocaleString(); }
+function timeToMin(t){ const [h,m] = t.split(":").map(Number); return h*60+m; }
+function minToTime(min){ return pad2(Math.floor(min/60)) + ":" + pad2(min%60); }
+function toast(msg){
+  const t = $("#toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(t._tm);
+  t._tm = setTimeout(()=>t.classList.remove("show"), 2400);
+}
+function statusBadge(st){
+  return st === "active"    ? '<span class="badge active">予約中</span>'
+       : st === "cancelled" ? '<span class="badge cancelled">キャンセル</span>'
+       :                      '<span class="badge done">来店済み</span>';
+}
+function getUser(id){ return DB.users.find(u => u.id === id); }
+function getStylist(id){ return DB.stylists.find(s => s.id === id); }
+function getMenu(id){ return DB.menus.find(m => m.id === id); }
+function userName(id){ const u = getUser(id); return u ? u.name : "(削除済み)"; }
+function stylistName(id){ const s = getStylist(id); return s ? s.name : "(削除済み)"; }
+function menuLabel(id){ const m = getMenu(id); return m ? `${m.name}（${m.minutes}分 / ${yen(m.price)}）` : "(削除済み)"; }
+
+/* ---------- モーダル ---------- */
+function openModal(html){
+  $("#modal-body").innerHTML = html;
+  $("#modal-bg").classList.add("on");
+}
+function closeModal(){ $("#modal-bg").classList.remove("on"); }
+$("#modal-bg").addEventListener("click", e => { if(e.target.id === "modal-bg") closeModal(); });
+
+/* =====================================================
+   認証
+   ===================================================== */
+$("#login-form").addEventListener("submit", e => {
+  e.preventDefault();
+  const id = $("#login-id").value.trim();
+  const pw = $("#login-pw").value;
+  const user = DB.users.find(u => u.id === id && u.password === pw);
+  if(!user){
+    $("#login-error").style.display = "block";
+    return;
+  }
+  $("#login-error").style.display = "none";
+  session = user;
+  sessionStorage.setItem("nagase_session_uid", user.id);
+  enterApp();
+});
+
+function logout(){
+  session = null;
+  sessionStorage.removeItem("nagase_session_uid");
+  $("#app").style.display = "none";
+  $("#login-screen").style.display = "flex";
+  $("#login-id").value = "";
+  $("#login-pw").value = "";
+}
+
+/* 再読み込み時にセッション復元 */
+(function restore(){
+  const uid = sessionStorage.getItem("nagase_session_uid");
+  if(uid){
+    const u = getUser(uid);
+    if(u){ session = u; enterApp(); }
+  }
+})();
+
+function enterApp(){
+  $("#login-screen").style.display = "none";
+  $("#app").style.display = "block";
+  const roleLabel = session.role === "admin" ? '<span class="badge admin">管理者</span>' : "";
+  $("#user-label").innerHTML = `${esc(session.name)} 様 ${roleLabel}`;
+  buildTabs();
+}
+
+/* =====================================================
+   タブ構築（権限で出し分け）
+   ===================================================== */
+const CUSTOMER_TABS = [
+  { key:"book",    label:"新規予約",   render: renderBooking },
+  { key:"mylist",  label:"予約の確認", render: renderMyReservations },
+  { key:"history", label:"施術履歴",   render: renderMyHistory },
+  { key:"mypage",  label:"マイページ", render: renderMyPage }
+];
+const ADMIN_TABS = [
+  { key:"dash",      label:"ダッシュボード", render: renderDashboard },
+  { key:"resv",      label:"予約管理",       render: renderAdminReservations },
+  { key:"customers", label:"顧客管理",       render: renderCustomers },
+  { key:"records",   label:"施術履歴",       render: renderAdminHistory },
+  { key:"master",    label:"メニュー/担当",  render: renderMaster }
+];
+
+function tabsFor(){ return session.role === "admin" ? ADMIN_TABS : CUSTOMER_TABS; }
+
+function buildTabs(){
+  const tabs = tabsFor();
+  $("#tabs").innerHTML = tabs.map(t =>
+    `<button data-tab="${t.key}" onclick="switchTab('${t.key}')">${t.label}</button>`
+  ).join("");
+  $("#views").innerHTML = tabs.map(t => `<section class="view" id="view-${t.key}"></section>`).join("");
+  switchTab(tabs[0].key);
+}
+
+function switchTab(key){
+  currentTab = key;
+  $$("#tabs button").forEach(b => b.classList.toggle("on", b.dataset.tab === key));
+  $$(".view").forEach(v => v.classList.toggle("on", v.id === "view-" + key));
+  const t = tabsFor().find(t => t.key === key);
+  if(t) t.render($("#view-" + key));
+  window.scrollTo(0,0);
+}
+function refresh(){ if(currentTab) switchTab(currentTab); }
+
+/* =====================================================
+   予約の空き状況ロジック
+   ===================================================== */
+function activeResvs(){ return DB.reservations.filter(r => r.status === "active"); }
+
+/* 指定スタイリスト・日付の埋まっている時間帯 [{start,end}](分) */
+function busyRanges(stylistId, date, ignoreResvId){
+  return activeResvs()
+    .filter(r => r.stylistId === stylistId && r.date === date && r.id !== ignoreResvId)
+    .map(r => {
+      const m = getMenu(r.menuId);
+      const start = timeToMin(r.time);
+      return { start, end: start + (m ? m.minutes : SLOT_MIN) };
+    });
+}
+
+/* 予約可能な開始時刻リスト */
+function availableSlots(stylistId, date, menuId, ignoreResvId){
+  const menu = getMenu(menuId);
+  const dur = menu ? menu.minutes : SLOT_MIN;
+  const busy = busyRanges(stylistId, date, ignoreResvId);
+  const slots = [];
+  const isToday = date === todayStr();
+  const now = new Date();
+  const nowMin = now.getHours()*60 + now.getMinutes();
+  for(let t = OPEN_HOUR*60; t + dur <= CLOSE_HOUR*60; t += SLOT_MIN){
+    const overlap = busy.some(b => t < b.end && t + dur > b.start);
+    const past = isToday && t <= nowMin;
+    slots.push({ time: minToTime(t), ok: !overlap && !past });
+  }
+  return slots;
+}
+
+function isClosedDay(dateObj){ return dateObj.getDay() === CLOSED_WEEKDAY; }
+
+/* =====================================================
+   月間カレンダー描画（共通部品）
+   opts: {year,month, selDate, minDate, onPick(iso), countOf(iso), navId}
+   ===================================================== */
+function calendarHTML(opts){
+  const { year, month } = opts;
+  const first = new Date(year, month, 1);
+  const last  = new Date(year, month+1, 0);
+  let html = `
+    <div class="cal-head">
+      <button class="btn sub small" onclick="${opts.navId}(-1)">◀ 前月</button>
+      <span class="ym">${year}年 ${month+1}月</span>
+      <button class="btn sub small" onclick="${opts.navId}(1)">翌月 ▶</button>
+    </div>
+    <table class="cal"><tr>
+      <th class="sun">日</th><th>月</th><th>火</th><th>水</th><th>木</th><th>金</th><th class="sat">土</th>
+    </tr><tr>`;
+  for(let i=0;i<first.getDay();i++) html += "<td class='off'></td>";
+  for(let d=1; d<=last.getDate(); d++){
+    const dt = new Date(year, month, d);
+    const iso = fmtDate(dt);
+    const wd = dt.getDay();
+    if(wd === 0 && d !== 1) html += "</tr><tr>";
+    const tooOld = opts.minDate && iso < opts.minDate;
+    const closed = isClosedDay(dt);
+    const cnt = opts.countOf ? opts.countOf(iso) : 0;
+    const cntHtml = cnt > 0 ? `<span class="cnt">${cnt}件</span>` : "";
+    if(tooOld || closed){
+      html += `<td class="off">${d}${closed ? "<span class='cnt' style='color:#cfc6bf'>定休</span>" : ""}</td>`;
+    }else{
+      const sel = opts.selDate === iso ? " sel" : "";
+      html += `<td class="pick${sel}" onclick="${opts.onPick}('${iso}')">${d}${cntHtml}</td>`;
+    }
+  }
+  const lastWd = last.getDay();
+  for(let i=lastWd;i<6;i++) html += "<td class='off'></td>";
+  html += "</tr></table>";
+  return html;
+}
+
+/* =====================================================
+   【お客様】新規予約ウィザード
+   ===================================================== */
+const wiz = { step:0, stylistId:null, menuId:null, date:null, time:null, calY:null, calM:null };
+
+function renderBooking(el){
+  if(wiz.calY === null){
+    const n = new Date();
+    wiz.calY = n.getFullYear(); wiz.calM = n.getMonth();
+  }
+  const stepNames = ["担当者", "メニュー", "日時", "確認"];
+  const stepsHtml = `<div class="steps">` + stepNames.map((s,i) =>
+    `<div class="st ${i===wiz.step?"on":(i<wiz.step?"donez":"")}">${i+1}. ${s}</div>`).join("") + `</div>`;
+
+  let body = "";
+  if(wiz.step === 0){
+    body = `
+      <h2 class="page-title">担当スタイリストを選択</h2>
+      <p class="page-sub">ご希望の担当者をお選びください。</p>
+      <div class="choice-grid">
+        ${DB.stylists.map(s => `
+          <div class="choice ${wiz.stylistId===s.id?"sel":""}" onclick="wizPickStylist('${s.id}')">
+            <div class="nm">💇 ${esc(s.name)}</div>
+            <div class="ds">${esc(s.title)}</div>
+          </div>`).join("")}
+      </div>
+      <div class="wiz-nav">
+        <span></span>
+        <button class="btn" onclick="wizNext()" ${wiz.stylistId?"":"disabled"}>次へ ▶</button>
+      </div>`;
+  }
+  else if(wiz.step === 1){
+    body = `
+      <h2 class="page-title">メニューを選択</h2>
+      <p class="page-sub">担当：${esc(stylistName(wiz.stylistId))}</p>
+      <div class="choice-grid">
+        ${DB.menus.map(m => `
+          <div class="choice ${wiz.menuId===m.id?"sel":""}" onclick="wizPickMenu('${m.id}')">
+            <div class="nm">${esc(m.name)}</div>
+            <div class="ds">所要時間：約${m.minutes}分<br>料金：${yen(m.price)}（税込）</div>
+          </div>`).join("")}
+      </div>
+      <div class="wiz-nav">
+        <button class="btn sub" onclick="wizBack()">◀ 戻る</button>
+        <button class="btn" onclick="wizNext()" ${wiz.menuId?"":"disabled"}>次へ ▶</button>
+      </div>`;
+  }
+  else if(wiz.step === 2){
+    const slotsHtml = wiz.date ? `
+      <h3 style="margin:18px 0 4px;font-size:15px;">${jpDate(wiz.date)} の空き時間</h3>
+      <p class="muted">グレーの時間帯はご予約いただけません（所要時間：約${getMenu(wiz.menuId).minutes}分）</p>
+      <div class="slot-grid">
+        ${availableSlots(wiz.stylistId, wiz.date, wiz.menuId).map(s =>
+          s.ok
+            ? `<div class="slot ${wiz.time===s.time?"sel":""}" onclick="wizPickTime('${s.time}')">${s.time}</div>`
+            : `<div class="slot ng">${s.time}</div>`
+        ).join("")}
+      </div>` : `<p class="muted" style="margin-top:14px;">カレンダーから日付を選択してください。</p>`;
+    body = `
+      <h2 class="page-title">日時を選択</h2>
+      <p class="page-sub">担当：${esc(stylistName(wiz.stylistId))} ／ ${esc(getMenu(wiz.menuId).name)}　※火曜定休</p>
+      <div class="card" style="padding:16px;">
+        ${calendarHTML({ year:wiz.calY, month:wiz.calM, selDate:wiz.date, minDate:todayStr(), onPick:"wizPickDate", navId:"wizCalNav" })}
+      </div>
+      ${slotsHtml}
+      <div class="wiz-nav">
+        <button class="btn sub" onclick="wizBack()">◀ 戻る</button>
+        <button class="btn" onclick="wizNext()" ${wiz.date && wiz.time ? "" : "disabled"}>次へ ▶</button>
+      </div>`;
+  }
+  else {
+    const m = getMenu(wiz.menuId);
+    body = `
+      <h2 class="page-title">予約内容の確認</h2>
+      <p class="page-sub">内容をご確認のうえ「予約を確定する」を押してください。</p>
+      <div class="card">
+        <table style="width:100%;border-collapse:collapse;font-size:15px;line-height:2.2;">
+          <tr><td class="muted" style="width:110px;">お名前</td><td><b>${esc(session.name)} 様</b></td></tr>
+          <tr><td class="muted">担当</td><td>${esc(stylistName(wiz.stylistId))}</td></tr>
+          <tr><td class="muted">メニュー</td><td>${esc(m.name)}（約${m.minutes}分）</td></tr>
+          <tr><td class="muted">日時</td><td><b>${jpDate(wiz.date)} ${wiz.time}〜</b></td></tr>
+          <tr><td class="muted">料金</td><td>${yen(m.price)}（税込）</td></tr>
+        </table>
+      </div>
+      <div class="wiz-nav">
+        <button class="btn sub" onclick="wizBack()">◀ 戻る</button>
+        <button class="btn" onclick="wizConfirm()">予約を確定する</button>
+      </div>`;
+  }
+  el.innerHTML = stepsHtml + body;
+}
+function wizPickStylist(id){ wiz.stylistId = id; wiz.date = null; wiz.time = null; refresh(); }
+function wizPickMenu(id){ wiz.menuId = id; wiz.time = null; refresh(); }
+function wizPickDate(iso){ wiz.date = iso; wiz.time = null; refresh(); }
+function wizPickTime(t){ wiz.time = t; refresh(); }
+function wizCalNav(d){
+  wiz.calM += d;
+  if(wiz.calM < 0){ wiz.calM = 11; wiz.calY--; }
+  if(wiz.calM > 11){ wiz.calM = 0; wiz.calY++; }
+  refresh();
+}
+function wizNext(){ wiz.step = Math.min(3, wiz.step+1); refresh(); }
+function wizBack(){ wiz.step = Math.max(0, wiz.step-1); refresh(); }
+
+function wizConfirm(){
+  // 直前の空き再チェック（他の予約と衝突していないか）
+  const slot = availableSlots(wiz.stylistId, wiz.date, wiz.menuId).find(s => s.time === wiz.time);
+  if(!slot || !slot.ok){
+    toast("申し訳ありません。その時間は埋まってしまいました。");
+    wiz.time = null; wiz.step = 2; refresh();
+    return;
+  }
+  DB.reservations.push({
+    id: nextId("r"),
+    userId: session.id,
+    stylistId: wiz.stylistId,
+    menuId: wiz.menuId,
+    date: wiz.date,
+    time: wiz.time,
+    status: "active",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  });
+  saveDB();
+  toast("ご予約を承りました");
+  Object.assign(wiz, { step:0, stylistId:null, menuId:null, date:null, time:null });
+  switchTab("mylist");
+}
+
+/* =====================================================
+   【お客様】予約の確認・変更・キャンセル
+   ===================================================== */
+function renderMyReservations(el){
+  const mine = DB.reservations
+    .filter(r => r.userId === session.id)
+    .sort((a,b) => (b.date + b.time).localeCompare(a.date + a.time));
+  const upcoming = mine.filter(r => r.status === "active" && r.date >= todayStr());
+  const others   = mine.filter(r => !(r.status === "active" && r.date >= todayStr()));
+
+  const item = (r, canEdit) => {
+    const m = getMenu(r.menuId);
+    return `
+    <div class="list-item">
+      <div class="info">
+        <div class="ttl">${jpDate(r.date)} ${r.time}〜 ${statusBadge(r.status)}</div>
+        <div class="sb">担当：${esc(stylistName(r.stylistId))} ／ ${esc(m ? m.name : "")}（${yen(m ? m.price : 0)}）</div>
+      </div>
+      ${canEdit ? `
+      <div class="acts">
+        <button class="btn sub small" onclick="openChangeResv('${r.id}')">日時変更</button>
+        <button class="btn danger small" onclick="cancelResv('${r.id}', false)">キャンセル</button>
+      </div>` : ""}
+    </div>`;
+  };
+
+  el.innerHTML = `
+    <h2 class="page-title">ご予約の確認</h2>
+    <p class="page-sub">これからのご予約の変更・キャンセルができます。</p>
+    ${upcoming.length ? upcoming.map(r => item(r, true)).join("") : `<div class="empty">現在、ご予約はありません。<br>「新規予約」からご予約いただけます。</div>`}
+    ${others.length ? `<h3 style="margin:26px 0 12px;font-size:15px;color:var(--muted);">過去の予約・キャンセル履歴</h3>${others.map(r => item(r, false)).join("")}` : ""}
+  `;
+}
+
+function cancelResv(id, byAdmin){
+  const r = DB.reservations.find(x => x.id === id);
+  if(!r) return;
+  const who = byAdmin ? `${esc(userName(r.userId))} 様の` : "この";
+  openModal(`
+    <h3>予約のキャンセル</h3>
+    <p style="line-height:1.9;">${who}予約をキャンセルしますか？<br>
+    <b>${jpDate(r.date)} ${r.time}〜</b>（担当：${esc(stylistName(r.stylistId))}）</p>
+    <div class="m-acts">
+      <button class="btn sub" onclick="closeModal()">戻る</button>
+      <button class="btn danger" onclick="doCancelResv('${id}')">キャンセルする</button>
+    </div>`);
+}
+function doCancelResv(id){
+  const r = DB.reservations.find(x => x.id === id);
+  if(r){ r.status = "cancelled"; r.updatedAt = new Date().toISOString(); saveDB(); }
+  closeModal();
+  toast("予約をキャンセルしました");
+  refresh();
+}
+
+/* --- 日時変更 --- */
+const chg = { resvId:null, date:null, time:null, calY:null, calM:null };
+function openChangeResv(id){
+  const r = DB.reservations.find(x => x.id === id);
+  if(!r) return;
+  const n = new Date();
+  Object.assign(chg, { resvId:id, date:r.date, time:null, calY:n.getFullYear(), calM:n.getMonth() });
+  renderChangeModal();
+}
+function chgCalNav(d){
+  chg.calM += d;
+  if(chg.calM < 0){ chg.calM = 11; chg.calY--; }
+  if(chg.calM > 11){ chg.calM = 0; chg.calY++; }
+  renderChangeModal();
+}
+function chgPickDate(iso){ chg.date = iso; chg.time = null; renderChangeModal(); }
+function chgPickTime(t){ chg.time = t; renderChangeModal(); }
+function renderChangeModal(){
+  const r = DB.reservations.find(x => x.id === chg.resvId);
+  const slots = chg.date ? availableSlots(r.stylistId, chg.date, r.menuId, r.id) : [];
+  openModal(`
+    <h3>予約の日時変更</h3>
+    <p class="muted" style="margin-bottom:12px;">現在：${jpDate(r.date)} ${r.time}〜 ／ 担当：${esc(stylistName(r.stylistId))}</p>
+    ${calendarHTML({ year:chg.calY, month:chg.calM, selDate:chg.date, minDate:todayStr(), onPick:"chgPickDate", navId:"chgCalNav" })}
+    ${chg.date ? `
+      <div class="slot-grid" style="margin-top:12px;">
+        ${slots.map(s => s.ok
+          ? `<div class="slot ${chg.time===s.time?"sel":""}" onclick="chgPickTime('${s.time}')">${s.time}</div>`
+          : `<div class="slot ng">${s.time}</div>`).join("")}
+      </div>` : ""}
+    <div class="m-acts">
+      <button class="btn sub" onclick="closeModal()">戻る</button>
+      <button class="btn" onclick="doChangeResv()" ${chg.date && chg.time ? "" : "disabled"}>変更を確定</button>
+    </div>`);
+}
+function doChangeResv(){
+  const r = DB.reservations.find(x => x.id === chg.resvId);
+  if(!r) return;
+  const slot = availableSlots(r.stylistId, chg.date, r.menuId, r.id).find(s => s.time === chg.time);
+  if(!slot || !slot.ok){ toast("その時間は埋まってしまいました"); return; }
+  r.date = chg.date; r.time = chg.time; r.updatedAt = new Date().toISOString();
+  saveDB();
+  closeModal();
+  toast("予約を変更しました");
+  refresh();
+}
+
+/* =====================================================
+   【お客様】施術履歴
+   ===================================================== */
+function renderMyHistory(el){
+  const list = DB.histories
+    .filter(h => h.userId === session.id)
+    .sort((a,b) => b.date.localeCompare(a.date));
+  el.innerHTML = `
+    <h2 class="page-title">施術履歴</h2>
+    <p class="page-sub">これまでの施術内容の記録です。</p>
+    ${list.length ? list.map(h => `
+      <div class="list-item">
+        <div class="info">
+          <div class="ttl">${jpDate(h.date)}　${esc(h.menuName)}</div>
+          <div class="sb">担当：${esc(h.stylistName)} ／ ${yen(h.price)}
+          ${h.memo ? `<br>メモ：${esc(h.memo)}` : ""}</div>
+        </div>
+      </div>`).join("") : `<div class="empty">施術履歴はまだありません。</div>`}
+  `;
+}
+
+/* =====================================================
+   【お客様】マイページ
+   ===================================================== */
+function renderMyPage(el){
+  el.innerHTML = `
+    <h2 class="page-title">マイページ</h2>
+    <p class="page-sub">会員情報の確認・変更ができます。</p>
+    <div class="card" style="max-width:480px;">
+      <div class="field"><label>会員ID</label><input value="${esc(session.id)}" disabled></div>
+      <div class="field"><label>お名前</label><input id="mp-name" value="${esc(session.name)}"></div>
+      <div class="field"><label>フリガナ</label><input id="mp-kana" value="${esc(session.kana||"")}"></div>
+      <div class="field"><label>電話番号</label><input id="mp-phone" value="${esc(session.phone||"")}"></div>
+      <div class="field"><label>メールアドレス</label><input id="mp-email" value="${esc(session.email||"")}"></div>
+      <div class="field"><label>パスワード</label><input id="mp-pw" type="password" value="${esc(session.password)}"></div>
+      <button class="btn" onclick="saveMyPage()">保存する</button>
+    </div>`;
+}
+function saveMyPage(){
+  const u = getUser(session.id);
+  const name = $("#mp-name").value.trim();
+  const pw = $("#mp-pw").value;
+  if(!name){ toast("お名前を入力してください"); return; }
+  if(!pw){ toast("パスワードを入力してください"); return; }
+  Object.assign(u, {
+    name, kana: $("#mp-kana").value.trim(),
+    phone: $("#mp-phone").value.trim(),
+    email: $("#mp-email").value.trim(),
+    password: pw
+  });
+  session = u;
+  saveDB();
+  $("#user-label").innerHTML = `${esc(session.name)} 様 `;
+  toast("会員情報を保存しました");
+}
+
+/* =====================================================
+   【管理者】ダッシュボード
+   ===================================================== */
+function renderDashboard(el){
+  const today = todayStr();
+  const todays = activeResvs().filter(r => r.date === today).sort((a,b) => a.time.localeCompare(b.time));
+  const future = activeResvs().filter(r => r.date >= today).length;
+  const customers = DB.users.filter(u => u.role === "customer").length;
+  const monthPrefix = today.slice(0,7);
+  const monthDone = DB.histories.filter(h => h.date.startsWith(monthPrefix));
+  const monthSales = monthDone.reduce((s,h) => s + (h.price||0), 0);
+
+  el.innerHTML = `
+    <h2 class="page-title">ダッシュボード</h2>
+    <p class="page-sub">${jpDate(today)} の状況</p>
+    <div class="stat-row">
+      <div class="stat"><div class="lb">本日の予約</div><div class="vl">${todays.length}<small> 件</small></div></div>
+      <div class="stat"><div class="lb">今後の予約合計</div><div class="vl">${future}<small> 件</small></div></div>
+      <div class="stat"><div class="lb">登録顧客数</div><div class="vl">${customers}<small> 名</small></div></div>
+      <div class="stat"><div class="lb">今月の施術売上</div><div class="vl" style="font-size:20px;">${yen(monthSales)}</div></div>
+    </div>
+    <h3 style="margin:8px 0 12px;font-size:16px;">本日の予約一覧</h3>
+    ${todays.length ? todays.map(r => adminResvItem(r)).join("") : `<div class="empty">本日の予約はありません。</div>`}
+  `;
+}
+
+/* =====================================================
+   【管理者】予約管理
+   ===================================================== */
+const adm = { calY:null, calM:null, selDate:null, filter:"active" };
+
+function renderAdminReservations(el){
+  if(adm.calY === null){
+    const n = new Date();
+    adm.calY = n.getFullYear(); adm.calM = n.getMonth(); adm.selDate = todayStr();
+  }
+  const countOf = iso => activeResvs().filter(r => r.date === iso).length;
+  let list = DB.reservations.filter(r => r.date === adm.selDate);
+  if(adm.filter !== "all") list = list.filter(r => r.status === adm.filter);
+  list.sort((a,b) => a.time.localeCompare(b.time));
+
+  el.innerHTML = `
+    <h2 class="page-title">予約管理</h2>
+    <p class="page-sub">カレンダーの日付を選ぶと、その日の予約が表示されます。数字はその日の予約件数です。</p>
+    <div class="card" style="padding:16px;margin-bottom:18px;">
+      ${calendarHTML({ year:adm.calY, month:adm.calM, selDate:adm.selDate, onPick:"admPickDate", navId:"admCalNav", countOf })}
+    </div>
+    <div class="toolbar">
+      <b>${jpDate(adm.selDate)}</b>
+      <select onchange="admSetFilter(this.value)">
+        <option value="active" ${adm.filter==="active"?"selected":""}>予約中のみ</option>
+        <option value="all" ${adm.filter==="all"?"selected":""}>すべて表示</option>
+        <option value="done" ${adm.filter==="done"?"selected":""}>来店済みのみ</option>
+        <option value="cancelled" ${adm.filter==="cancelled"?"selected":""}>キャンセルのみ</option>
+      </select>
+    </div>
+    ${list.length ? list.map(r => adminResvItem(r)).join("") : `<div class="empty">該当する予約はありません。</div>`}
+  `;
+}
+function admCalNav(d){
+  adm.calM += d;
+  if(adm.calM < 0){ adm.calM = 11; adm.calY--; }
+  if(adm.calM > 11){ adm.calM = 0; adm.calY++; }
+  refresh();
+}
+function admPickDate(iso){ adm.selDate = iso; refresh(); }
+function admSetFilter(v){ adm.filter = v; refresh(); }
+
+function adminResvItem(r){
+  const m = getMenu(r.menuId);
+  const u = getUser(r.userId);
+  return `
+  <div class="list-item">
+    <div class="info">
+      <div class="ttl">${r.time}〜　${esc(u ? u.name : "(削除済み)")} 様 ${statusBadge(r.status)}</div>
+      <div class="sb">${jpDate(r.date)} ／ 担当：${esc(stylistName(r.stylistId))} ／ ${esc(m ? m.name : "")}（約${m ? m.minutes : "?"}分 / ${yen(m ? m.price : 0)}）
+      ${u && u.phone ? `<br>TEL：${esc(u.phone)}` : ""}</div>
+    </div>
+    <div class="acts">
+      ${r.status === "active" ? `
+        <button class="btn small" onclick="openDoneResv('${r.id}')">来店済みにする</button>
+        <button class="btn danger small" onclick="cancelResv('${r.id}', true)">キャンセル</button>` : ""}
+    </div>
+  </div>`;
+}
+
+/* --- 来店済み処理（施術履歴も同時登録） --- */
+function openDoneResv(id){
+  const r = DB.reservations.find(x => x.id === id);
+  if(!r) return;
+  const m = getMenu(r.menuId);
+  openModal(`
+    <h3>来店済みにする</h3>
+    <p class="muted" style="margin-bottom:14px;">${esc(userName(r.userId))} 様 ／ ${jpDate(r.date)} ${r.time}〜</p>
+    <div class="field"><label>施術メニュー</label><input id="dn-menu" value="${esc(m ? m.name : "")}"></div>
+    <div class="field"><label>料金（円）</label><input id="dn-price" type="number" value="${m ? m.price : 0}"></div>
+    <div class="field"><label>カルテメモ（薬剤・仕上がりなど）</label><textarea id="dn-memo" rows="3" placeholder="例）カラー 8トーン アッシュ系。次回は根元リタッチ推奨。"></textarea></div>
+    <div class="m-acts">
+      <button class="btn sub" onclick="closeModal()">戻る</button>
+      <button class="btn" onclick="doDoneResv('${id}')">登録して完了</button>
+    </div>`);
+}
+function doDoneResv(id){
+  const r = DB.reservations.find(x => x.id === id);
+  if(!r) return;
+  r.status = "done";
+  r.updatedAt = new Date().toISOString();
+  DB.histories.push({
+    id: nextId("h"),
+    userId: r.userId,
+    date: r.date,
+    stylistName: stylistName(r.stylistId),
+    menuName: $("#dn-menu").value.trim() || "施術",
+    price: Number($("#dn-price").value) || 0,
+    memo: $("#dn-memo").value.trim(),
+    createdAt: new Date().toISOString()
+  });
+  saveDB();
+  closeModal();
+  toast("来店済みにし、施術履歴を登録しました");
+  refresh();
+}
+
+/* =====================================================
+   【管理者】顧客管理
+   ===================================================== */
+let custSearch = "";
+function renderCustomers(el){
+  const q = custSearch.trim();
+  const list = DB.users
+    .filter(u => u.role === "customer")
+    .filter(u => !q || u.id.includes(q) || u.name.includes(q) || (u.kana||"").includes(q) || (u.phone||"").includes(q));
+  el.innerHTML = `
+    <h2 class="page-title">顧客管理</h2>
+    <p class="page-sub">お客様アカウントの登録・編集・削除ができます。</p>
+    <div class="toolbar">
+      <input type="text" placeholder="ID / 氏名 / フリガナ / 電話 で検索" value="${esc(custSearch)}"
+        oninput="custSearch=this.value;refresh();" style="flex:1;min-width:200px;">
+      <button class="btn" onclick="openCustomerForm()">＋ 新規顧客</button>
+    </div>
+    ${list.length ? `
+    <table class="plain">
+      <tr><th>ID</th><th>氏名</th><th>電話番号</th><th>来店回数</th><th style="width:230px;"></th></tr>
+      ${list.map(u => {
+        const visits = DB.histories.filter(h => h.userId === u.id).length;
+        return `<tr>
+          <td>${esc(u.id)}</td>
+          <td><b>${esc(u.name)}</b><br><span class="muted">${esc(u.kana||"")}</span></td>
+          <td>${esc(u.phone||"-")}</td>
+          <td>${visits} 回</td>
+          <td>
+            <button class="btn sub small" onclick="openCustomerDetail('${u.id}')">カルテ</button>
+            <button class="btn sub small" onclick="openCustomerForm('${u.id}')">編集</button>
+            <button class="btn danger small" onclick="deleteCustomer('${u.id}')">削除</button>
+          </td>
+        </tr>`;
+      }).join("")}
+    </table>` : `<div class="empty">該当する顧客がいません。</div>`}
+  `;
+}
+
+function openCustomerForm(id){
+  const u = id ? getUser(id) : null;
+  openModal(`
+    <h3>${u ? "顧客情報の編集" : "新規顧客の登録"}</h3>
+    <div class="field"><label>会員ID（ログインID）</label>
+      <input id="cf-id" value="${esc(u ? u.id : "")}" ${u ? "disabled" : ""} placeholder="例）001"></div>
+    <div class="field"><label>パスワード</label><input id="cf-pw" value="${esc(u ? u.password : "")}" placeholder="初期パスワード"></div>
+    <div class="field"><label>氏名</label><input id="cf-name" value="${esc(u ? u.name : "")}"></div>
+    <div class="field"><label>フリガナ</label><input id="cf-kana" value="${esc(u ? u.kana||"" : "")}"></div>
+    <div class="field"><label>電話番号</label><input id="cf-phone" value="${esc(u ? u.phone||"" : "")}"></div>
+    <div class="field"><label>メールアドレス</label><input id="cf-email" value="${esc(u ? u.email||"" : "")}"></div>
+    <div class="field"><label>メモ（髪質・アレルギー・注意点など）</label><textarea id="cf-note" rows="3">${esc(u ? u.note||"" : "")}</textarea></div>
+    <div class="m-acts">
+      <button class="btn sub" onclick="closeModal()">戻る</button>
+      <button class="btn" onclick="saveCustomer(${u ? `'${u.id}'` : "null"})">保存</button>
+    </div>`);
+}
+function saveCustomer(id){
+  const newId = id || $("#cf-id").value.trim();
+  const pw = $("#cf-pw").value;
+  const name = $("#cf-name").value.trim();
+  if(!newId || !pw || !name){ toast("ID・パスワード・氏名は必須です"); return; }
+  if(!id && getUser(newId)){ toast("そのIDは既に使われています"); return; }
+  const data = {
+    password: pw, name,
+    kana: $("#cf-kana").value.trim(),
+    phone: $("#cf-phone").value.trim(),
+    email: $("#cf-email").value.trim(),
+    note: $("#cf-note").value.trim()
+  };
+  if(id){
+    Object.assign(getUser(id), data);
+  }else{
+    DB.users.push({ id:newId, role:"customer", ...data });
+  }
+  saveDB();
+  closeModal();
+  toast(id ? "顧客情報を更新しました" : "新規顧客を登録しました");
+  refresh();
+}
+function deleteCustomer(id){
+  const u = getUser(id);
+  if(!u) return;
+  openModal(`
+    <h3>顧客の削除</h3>
+    <p style="line-height:1.9;"><b>${esc(u.name)} 様</b>（ID:${esc(u.id)}）を削除しますか？<br>
+    <span class="muted">この顧客の今後の予約もすべてキャンセルされます。施術履歴は残ります。</span></p>
+    <div class="m-acts">
+      <button class="btn sub" onclick="closeModal()">戻る</button>
+      <button class="btn danger" onclick="doDeleteCustomer('${id}')">削除する</button>
+    </div>`);
+}
+function doDeleteCustomer(id){
+  DB.users = DB.users.filter(u => u.id !== id);
+  DB.reservations.forEach(r => {
+    if(r.userId === id && r.status === "active"){ r.status = "cancelled"; r.updatedAt = new Date().toISOString(); }
+  });
+  saveDB();
+  closeModal();
+  toast("顧客を削除しました");
+  refresh();
+}
+
+/* --- 顧客カルテ（詳細 + 履歴登録） --- */
+function openCustomerDetail(id){
+  const u = getUser(id);
+  if(!u) return;
+  const hist = DB.histories.filter(h => h.userId === id).sort((a,b) => b.date.localeCompare(a.date));
+  const resv = DB.reservations.filter(r => r.userId === id && r.status === "active" && r.date >= todayStr())
+    .sort((a,b) => (a.date + a.time).localeCompare(b.date + b.time));
+  openModal(`
+    <h3>カルテ：${esc(u.name)} 様</h3>
+    <p class="muted" style="line-height:1.8;margin-bottom:14px;">
+      ID:${esc(u.id)} ／ TEL:${esc(u.phone||"-")} ／ ${esc(u.email||"-")}<br>
+      ${u.note ? "メモ：" + esc(u.note) : ""}
+    </p>
+    ${resv.length ? `<h4 style="font-size:14px;margin-bottom:8px;">今後の予約</h4>
+      ${resv.map(r => `<p class="muted" style="margin-bottom:6px;">・${jpDate(r.date)} ${r.time}〜（${esc(stylistName(r.stylistId))}）</p>`).join("")}` : ""}
+    <h4 style="font-size:14px;margin:14px 0 8px;">施術履歴（${hist.length}件）</h4>
+    ${hist.length ? hist.map(h => `
+      <div style="border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:13px;line-height:1.7;">
+        <b>${jpDate(h.date)}</b>　${esc(h.menuName)}（${yen(h.price)}）／ 担当：${esc(h.stylistName)}
+        ${h.memo ? `<br><span class="muted">メモ：${esc(h.memo)}</span>` : ""}
+      </div>`).join("") : `<p class="muted">履歴はまだありません。</p>`}
+    <div class="m-acts">
+      <button class="btn sub" onclick="closeModal()">閉じる</button>
+      <button class="btn" onclick="openHistoryForm('${id}')">＋ 履歴を手動登録</button>
+    </div>`);
+}
+
+/* --- 施術履歴の手動登録 --- */
+function openHistoryForm(userId){
+  const options = DB.users.filter(u => u.role === "customer")
+    .map(u => `<option value="${esc(u.id)}" ${u.id===userId?"selected":""}>${esc(u.name)}（${esc(u.id)}）</option>`).join("");
+  openModal(`
+    <h3>施術履歴の登録</h3>
+    <div class="field"><label>お客様</label><select id="hf-user">${options}</select></div>
+    <div class="field"><label>施術日</label><input id="hf-date" type="date" value="${todayStr()}"></div>
+    <div class="field"><label>担当</label>
+      <select id="hf-stylist">${DB.stylists.map(s => `<option>${esc(s.name)}</option>`).join("")}</select></div>
+    <div class="field"><label>施術メニュー</label><input id="hf-menu" placeholder="例）カット + カラー"></div>
+    <div class="field"><label>料金（円）</label><input id="hf-price" type="number" value="0"></div>
+    <div class="field"><label>カルテメモ</label><textarea id="hf-memo" rows="3"></textarea></div>
+    <div class="m-acts">
+      <button class="btn sub" onclick="closeModal()">戻る</button>
+      <button class="btn" onclick="saveHistory()">登録する</button>
+    </div>`);
+}
+function saveHistory(){
+  const userId = $("#hf-user").value;
+  const date = $("#hf-date").value;
+  const menuName = $("#hf-menu").value.trim();
+  if(!userId || !date || !menuName){ toast("お客様・施術日・メニューは必須です"); return; }
+  DB.histories.push({
+    id: nextId("h"),
+    userId, date,
+    stylistName: $("#hf-stylist").value,
+    menuName,
+    price: Number($("#hf-price").value) || 0,
+    memo: $("#hf-memo").value.trim(),
+    createdAt: new Date().toISOString()
+  });
+  saveDB();
+  closeModal();
+  toast("施術履歴を登録しました");
+  refresh();
+}
+
+/* =====================================================
+   【管理者】施術履歴一覧
+   ===================================================== */
+let histSearch = "";
+function renderAdminHistory(el){
+  const q = histSearch.trim();
+  const list = DB.histories
+    .filter(h => !q || userName(h.userId).includes(q) || h.menuName.includes(q) || h.date.includes(q))
+    .sort((a,b) => b.date.localeCompare(a.date));
+  el.innerHTML = `
+    <h2 class="page-title">施術履歴</h2>
+    <p class="page-sub">全お客様の施術記録です。予約を「来店済み」にすると自動で登録されます。</p>
+    <div class="toolbar">
+      <input type="text" placeholder="氏名 / メニュー / 日付(YYYY-MM-DD) で検索" value="${esc(histSearch)}"
+        oninput="histSearch=this.value;refresh();" style="flex:1;min-width:200px;">
+      <button class="btn" onclick="openHistoryForm()">＋ 手動登録</button>
+    </div>
+    ${list.length ? `
+    <table class="plain">
+      <tr><th>施術日</th><th>お客様</th><th>メニュー</th><th>担当</th><th>料金</th><th></th></tr>
+      ${list.map(h => `<tr>
+        <td>${jpDate(h.date)}</td>
+        <td><b>${esc(userName(h.userId))}</b></td>
+        <td>${esc(h.menuName)}${h.memo ? `<br><span class="muted">${esc(h.memo)}</span>` : ""}</td>
+        <td>${esc(h.stylistName)}</td>
+        <td>${yen(h.price)}</td>
+        <td><button class="btn danger small" onclick="deleteHistory('${h.id}')">削除</button></td>
+      </tr>`).join("")}
+    </table>` : `<div class="empty">施術履歴はまだありません。</div>`}
+  `;
+}
+function deleteHistory(id){
+  const h = DB.histories.find(x => x.id === id);
+  if(!h) return;
+  openModal(`
+    <h3>履歴の削除</h3>
+    <p style="line-height:1.9;">${jpDate(h.date)} の ${esc(userName(h.userId))} 様の履歴（${esc(h.menuName)}）を削除しますか？</p>
+    <div class="m-acts">
+      <button class="btn sub" onclick="closeModal()">戻る</button>
+      <button class="btn danger" onclick="doDeleteHistory('${id}')">削除する</button>
+    </div>`);
+}
+function doDeleteHistory(id){
+  DB.histories = DB.histories.filter(h => h.id !== id);
+  saveDB();
+  closeModal();
+  toast("履歴を削除しました");
+  refresh();
+}
+
+/* =====================================================
+   【管理者】メニュー / スタイリスト管理
+   ===================================================== */
+function renderMaster(el){
+  el.innerHTML = `
+    <h2 class="page-title">メニュー / 担当者の管理</h2>
+    <p class="page-sub">予約画面に表示されるメニューとスタイリストを管理します。</p>
+
+    <div class="toolbar" style="justify-content:space-between;">
+      <h3 style="font-size:16px;">施術メニュー</h3>
+      <button class="btn small" onclick="openMenuForm()">＋ メニュー追加</button>
+    </div>
+    <table class="plain" style="margin-bottom:30px;">
+      <tr><th>メニュー名</th><th>所要時間</th><th>料金</th><th style="width:140px;"></th></tr>
+      ${DB.menus.map(m => `<tr>
+        <td><b>${esc(m.name)}</b></td><td>約${m.minutes}分</td><td>${yen(m.price)}</td>
+        <td>
+          <button class="btn sub small" onclick="openMenuForm('${m.id}')">編集</button>
+          <button class="btn danger small" onclick="deleteMenu('${m.id}')">削除</button>
+        </td>
+      </tr>`).join("")}
+    </table>
+
+    <div class="toolbar" style="justify-content:space-between;">
+      <h3 style="font-size:16px;">スタイリスト</h3>
+      <button class="btn small" onclick="openStylistForm()">＋ スタイリスト追加</button>
+    </div>
+    <table class="plain">
+      <tr><th>氏名</th><th>肩書き</th><th style="width:140px;"></th></tr>
+      ${DB.stylists.map(s => `<tr>
+        <td><b>${esc(s.name)}</b></td><td>${esc(s.title)}</td>
+        <td>
+          <button class="btn sub small" onclick="openStylistForm('${s.id}')">編集</button>
+          <button class="btn danger small" onclick="deleteStylist('${s.id}')">削除</button>
+        </td>
+      </tr>`).join("")}
+    </table>
+  `;
+}
+function openMenuForm(id){
+  const m = id ? getMenu(id) : null;
+  openModal(`
+    <h3>${m ? "メニューの編集" : "メニューの追加"}</h3>
+    <div class="field"><label>メニュー名</label><input id="mf-name" value="${esc(m ? m.name : "")}"></div>
+    <div class="field"><label>所要時間（分・30分単位推奨）</label><input id="mf-min" type="number" step="15" value="${m ? m.minutes : 60}"></div>
+    <div class="field"><label>料金（円・税込）</label><input id="mf-price" type="number" value="${m ? m.price : 0}"></div>
+    <div class="m-acts">
+      <button class="btn sub" onclick="closeModal()">戻る</button>
+      <button class="btn" onclick="saveMenu(${m ? `'${m.id}'` : "null"})">保存</button>
+    </div>`);
+}
+function saveMenu(id){
+  const name = $("#mf-name").value.trim();
+  const minutes = Number($("#mf-min").value);
+  const price = Number($("#mf-price").value);
+  if(!name || !minutes){ toast("メニュー名と所要時間は必須です"); return; }
+  if(id){ Object.assign(getMenu(id), { name, minutes, price }); }
+  else{ DB.menus.push({ id: nextId("m"), name, minutes, price }); }
+  saveDB(); closeModal(); toast("メニューを保存しました"); refresh();
+}
+function deleteMenu(id){
+  if(activeResvs().some(r => r.menuId === id)){ toast("このメニューの予約が入っているため削除できません"); return; }
+  DB.menus = DB.menus.filter(m => m.id !== id);
+  saveDB(); toast("メニューを削除しました"); refresh();
+}
+function openStylistForm(id){
+  const s = id ? getStylist(id) : null;
+  openModal(`
+    <h3>${s ? "スタイリストの編集" : "スタイリストの追加"}</h3>
+    <div class="field"><label>氏名</label><input id="sf-name" value="${esc(s ? s.name : "")}"></div>
+    <div class="field"><label>肩書き</label><input id="sf-title" value="${esc(s ? s.title : "スタイリスト")}"></div>
+    <div class="m-acts">
+      <button class="btn sub" onclick="closeModal()">戻る</button>
+      <button class="btn" onclick="saveStylist(${s ? `'${s.id}'` : "null"})">保存</button>
+    </div>`);
+}
+function saveStylist(id){
+  const name = $("#sf-name").value.trim();
+  if(!name){ toast("氏名は必須です"); return; }
+  if(id){ Object.assign(getStylist(id), { name, title: $("#sf-title").value.trim() }); }
+  else{ DB.stylists.push({ id: nextId("s"), name, title: $("#sf-title").value.trim() }); }
+  saveDB(); closeModal(); toast("スタイリストを保存しました"); refresh();
+}
+function deleteStylist(id){
+  if(activeResvs().some(r => r.stylistId === id)){ toast("このスタイリストの予約が入っているため削除できません"); return; }
+  DB.stylists = DB.stylists.filter(s => s.id !== id);
+  saveDB(); toast("スタイリストを削除しました"); refresh();
+}
+</script>
+</body>
+</html>
