@@ -1,11 +1,20 @@
 -- =====================================================
--- 永瀬美容室 予約・顧客管理システム テーブル定義
+-- 永瀬美容室 予約・顧客管理システム テーブル定義 + 初期データ
 -- データベース: nagase_salon
 --
--- ※ 初期データ（テストアカウント等）はパスワードを
---    ハッシュ化して登録するため api/install.php が投入します。
---    このファイルは phpMyAdmin での手動構築・提出資料用です。
+-- 【phpMyAdmin でのセットアップ手順】
+--   1. phpMyAdmin の「インポート」タブでこのファイルを選択して実行
+--      （または「SQL」タブに全文を貼り付けて実行）
+--   2. http://localhost/salon/ を開いてログイン
+--      管理者: ID 123 / パスワード 123
+--      お客様: ID 000 / パスワード 000
+--
+-- ※ api/install.php をブラウザで開いても同じセットアップができます。
+--    何度実行してもデータは二重登録されません。
 -- =====================================================
+
+-- 日本語の文字化け防止（クライアント接続の文字コードを明示）
+SET NAMES utf8mb4;
 
 CREATE DATABASE IF NOT EXISTS nagase_salon
   CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -80,3 +89,32 @@ CREATE TABLE IF NOT EXISTS histories (
   KEY idx_date (date),
   CONSTRAINT fk_hist_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB COMMENT='施術履歴';
+
+-- =====================================================
+-- 初期データ（既に登録済みの場合はスキップされます）
+-- =====================================================
+
+-- テストアカウント
+--   管理者:  ID 123 / パスワード 123
+--   お客様:  ID 000 / パスワード 000
+-- パスワードは PHP の password_hash()（bcrypt）で生成したハッシュ値
+INSERT IGNORE INTO users (id, password_hash, role, name, kana, phone, email, note) VALUES
+  ('123', '$2y$12$VbiKjjrE6SJIF8kyf81dW.iNIgOMgeUWiLgvvDoM5IvhdxayUi.H.', 'admin',
+   '永瀬 店長', 'ナガセ テンチョウ', '', '', '管理者アカウント'),
+  ('000', '$2y$12$NFAgmnMNED/yD/RI7PpWR.T7rlgAmffybnx7NeggNvsS7Yp9aD016', 'customer',
+   '山田 花子', 'ヤマダ ハナコ', '090-0000-0000', 'hanako@example.com', 'テスト用のお客様アカウント');
+
+-- スタイリスト
+INSERT IGNORE INTO stylists (id, name, title) VALUES
+  (1, '永瀬 貴之', '店長 / トップスタイリスト'),
+  (2, '佐藤 美咲', 'スタイリスト'),
+  (3, '田中 玲奈', 'カラーリスト');
+
+-- 施術メニュー
+INSERT IGNORE INTO menus (id, name, minutes, price) VALUES
+  (1, 'カット',            60,  4400),
+  (2, 'カット + カラー',   120, 9900),
+  (3, 'カット + パーマ',   150, 11000),
+  (4, 'カラーのみ',        90,  7150),
+  (5, 'トリートメント',    30,  3300),
+  (6, 'ヘッドスパ',        45,  4950);

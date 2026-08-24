@@ -13,12 +13,23 @@
 
 1. [XAMPP](https://www.apachefriends.org/jp/) をインストールし、コントロールパネルで **Apache** と **MySQL** を起動する
 2. この `salon` フォルダを丸ごと `C:\xampp\htdocs\` にコピーする（`C:\xampp\htdocs\salon\index.html` になる配置）
-3. ブラウザで **http://localhost/salon/api/install.php** を1回開く
-   → データベース `nagase_salon`・テーブル・テストアカウントが自動作成される
+3. データベースを作成する（下記A・Bどちらか片方でOK）
 4. **http://localhost/salon/** を開いてログイン
 
+### 方法A：phpMyAdmin で登録する
+
+1. phpMyAdmin（http://localhost/phpmyadmin/）を開く
+2. 上部メニューの **「インポート」** タブ →「ファイルを選択」で `salon/sql/setup.sql` を選び **「実行」**
+   （または **「SQL」** タブに `setup.sql` の中身を全文貼り付けて実行）
+3. 左側に `nagase_salon` データベースが5テーブル付きで作成され、テストアカウント・スタイリスト・メニューの初期データまで登録される
+
+### 方法B：install.php で自動作成する
+
+ブラウザで **http://localhost/salon/api/install.php** を1回開くだけ。
+→ データベース `nagase_salon`・テーブル・初期データが自動作成される（何度実行しても二重登録されない）
+
 DB接続設定（ホスト・ユーザー名など）を変える場合は `salon/api/config.php` を編集してください。
-テーブル定義のSQLは `salon/sql/setup.sql` にあります（phpMyAdminでの手動構築や提出資料にも使えます）。
+初期設定は XAMPP の標準（ホスト `127.0.0.1`、ユーザー `root`、パスワードなし）に合わせています。
 
 ## テスト用アカウント
 
