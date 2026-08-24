@@ -13,14 +13,28 @@ $messages = [];
 $errors   = [];
 
 try {
-    // データベース未作成でも接続できるよう、まずDB名なしで接続
-    $pdo = new PDO(
-        'mysql:host=' . DB_HOST . ';port=' . DB_PORT . ';charset=utf8mb4',
-        DB_USER, DB_PASS,
-        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
-    );
+    $opt = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION];
+    try {
+        // まずDB名ありで接続（レンタルサーバーはDBが用意済みなのでこちらで成功する）
+        $pdo = new PDO(
+            'mysql:host=' . DB_HOST . ';port=' . DB_PORT . ';dbname=' . DB_NAME . ';charset=utf8mb4',
+            DB_USER, DB_PASS, $opt
+        );
+    } catch (PDOException $e) {
+        // DBがまだ無い場合（XAMPP初回）はDB名なしで接続して作成する
+        $pdo = new PDO(
+            'mysql:host=' . DB_HOST . ';port=' . DB_PORT . ';charset=utf8mb4',
+            DB_USER, DB_PASS, $opt
+        );
+        $pdo->exec('CREATE DATABASE IF NOT EXISTS `' . DB_NAME . '`
+                    CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci');
+        $pdo->exec('USE `' . DB_NAME . '`');
+        $messages[] = 'データベース ' . DB_NAME . ' を作成しました';
+    }
 
     // スキーマ（sql/setup.sql）を実行
+    // CREATE DATABASE / USE は上で処理済みのためスキップする
+    // （レンタルサーバーではDB作成権限がなくエラーになるため）
     $sqlFile = __DIR__ . '/../sql/setup.sql';
     $sql = file_get_contents($sqlFile);
     if ($sql === false) {
@@ -29,11 +43,10 @@ try {
     // コメント行を除去し、セミコロン区切りで1文ずつ実行
     $sql = preg_replace('/^--.*$/m', '', $sql);
     foreach (array_filter(array_map('trim', explode(';', $sql))) as $stmt) {
+        if (preg_match('/^(CREATE\s+DATABASE|USE)\b/i', $stmt)) continue;
         $pdo->exec($stmt);
     }
-    $messages[] = 'データベースとテーブルを作成しました（既にある場合はそのまま）';
-
-    $pdo->exec('USE ' . DB_NAME);
+    $messages[] = 'テーブルを作成しました（既にある場合はそのまま）';
 
     // ---- 初期データ投入（存在しない場合のみ） ----
     $ins = $pdo->prepare(
@@ -88,7 +101,8 @@ try {
   <p>セットアップが完了しました。下のボタンからアプリを開いてください。</p>
   <a class="btn" href="../index.html">アプリを開く</a>
 <?php else: ?>
-  <p>XAMPPコントロールパネルで MySQL が起動しているか確認してから、ページを再読み込みしてください。</p>
+  <p>XAMPPの場合: コントロールパネルで MySQL が起動しているか確認してから、ページを再読み込みしてください。<br>
+     レンタルサーバーの場合: api/config.php の DB_NAME・DB_USER・DB_PASS がサーバー管理画面の値と一致しているか確認してください。</p>
 <?php endif; ?>
 </body>
 </html>
