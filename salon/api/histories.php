@@ -52,6 +52,13 @@ switch ($action) {
         if ($userId === '' || !valid_date($date) || $menuName === '') {
             fail('お客様・施術日・メニューは必須です');
         }
+        check_len($menuName, 100, 'メニュー名');
+        check_len(trim((string)($b['stylist_name'] ?? '')), 50, '担当者名');
+        check_len(trim((string)($b['memo'] ?? '')), 1000, 'メモ');
+        $price = (int)($b['price'] ?? 0);
+        if ($price < 0 || $price > 1000000) fail('料金が正しくありません');
+        demo_cap_rows('histories', 2000);
+
         $st = pdo()->prepare("SELECT name FROM users WHERE id = ? AND role = 'customer'");
         $st->execute([$userId]);
         $user = $st->fetch();

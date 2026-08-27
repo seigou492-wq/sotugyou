@@ -1,0 +1,24 @@
+# ================================================
+# セキュリティ設定（Apache用）
+# ================================================
+
+# フォルダの中身一覧を表示させない
+IndexIgnore *
+
+# SQLファイルをブラウザからダウンロードさせない
+<FilesMatch "\.sql$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>
+
+# セキュリティヘッダー
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "DENY"
+  Header set Referrer-Policy "same-origin"
+</IfModule>

@@ -118,3 +118,11 @@ INSERT IGNORE INTO menus (id, name, minutes, price) VALUES
   (4, 'カラーのみ',        90,  7150),
   (5, 'トリートメント',    30,  3300),
   (6, 'ヘッドスパ',        45,  4950);
+
+-- レート制限（ログイン総当たり攻撃対策）の記録用テーブル
+CREATE TABLE IF NOT EXISTS rate_limits (
+  bucket       VARCHAR(64) NOT NULL COMMENT '制限対象（例: login:IPアドレス）',
+  cnt          INT NOT NULL DEFAULT 1 COMMENT '時間窓内の試行回数',
+  window_start INT NOT NULL COMMENT '時間窓の開始（UNIX秒）',
+  PRIMARY KEY (bucket)
+) ENGINE=InnoDB COMMENT='レート制限';

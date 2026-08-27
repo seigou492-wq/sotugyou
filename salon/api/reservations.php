@@ -169,6 +169,7 @@ switch ($action) {
         $st = pdo()->prepare('SELECT COUNT(*) FROM stylists WHERE id = ? AND active = 1');
         $st->execute([$stylistId]);
         if ((int)$st->fetchColumn() === 0) fail('スタイリストが見つかりません');
+        demo_cap_rows('reservations', 1000);
 
         // トランザクション内で行ロックを取り、ダブルブッキングを防止
         pdo()->beginTransaction();
@@ -251,6 +252,9 @@ switch ($action) {
         $menuName = trim((string)($b['menu_name'] ?? '')) ?: $r['menu_name'];
         $price    = (int)($b['price'] ?? $r['price']);
         $memo     = trim((string)($b['memo'] ?? ''));
+        check_len($menuName, 100, 'メニュー名');
+        check_len($memo, 1000, 'メモ');
+        if ($price < 0 || $price > 1000000) fail('料金が正しくありません');
 
         // 予約を来店済みにし、施術履歴（カルテ）を同時登録
         pdo()->beginTransaction();

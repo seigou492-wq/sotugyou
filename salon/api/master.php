@@ -30,8 +30,12 @@ switch ($action) {
         $price   = (int)($b['price'] ?? 0);
         if ($name === '' || $minutes <= 0) fail('メニュー名と所要時間は必須です');
         if ($minutes % 15 !== 0) fail('所要時間は15分単位で入力してください');
+        check_len($name, 100, 'メニュー名');
+        if ($minutes > 480) fail('所要時間が長すぎます');
+        if ($price < 0 || $price > 1000000) fail('料金が正しくありません');
 
         $id = (int)($b['id'] ?? 0);
+        if ($id === 0) demo_cap_rows('menus', 50);
         if ($id > 0) {
             pdo()->prepare('UPDATE menus SET name = ?, minutes = ?, price = ? WHERE id = ?')
                  ->execute([$name, $minutes, $price, $id]);
@@ -44,6 +48,9 @@ switch ($action) {
 
     case 'delete_menu': {
         $id = (int)($b['id'] ?? 0);
+        if (is_demo_mode() && $id <= DEMO_SEED_MENUS) {
+            fail('デモ環境のため、初期登録のメニューは削除できません', 403);
+        }
         $st = pdo()->prepare(
             "SELECT COUNT(*) FROM reservations WHERE menu_id = ? AND status = 'active' AND date >= CURDATE()"
         );
@@ -57,8 +64,11 @@ switch ($action) {
         $name  = trim((string)($b['name'] ?? ''));
         $title = trim((string)($b['title'] ?? 'スタイリスト'));
         if ($name === '') fail('氏名は必須です');
+        check_len($name, 50, '氏名');
+        check_len($title, 100, '肩書き');
 
         $id = (int)($b['id'] ?? 0);
+        if ($id === 0) demo_cap_rows('stylists', 50);
         if ($id > 0) {
             pdo()->prepare('UPDATE stylists SET name = ?, title = ? WHERE id = ?')
                  ->execute([$name, $title, $id]);
@@ -71,6 +81,9 @@ switch ($action) {
 
     case 'delete_stylist': {
         $id = (int)($b['id'] ?? 0);
+        if (is_demo_mode() && $id <= DEMO_SEED_STYLISTS) {
+            fail('デモ環境のため、初期登録のスタイリストは削除できません', 403);
+        }
         $st = pdo()->prepare(
             "SELECT COUNT(*) FROM reservations WHERE stylist_id = ? AND status = 'active' AND date >= CURDATE()"
         );

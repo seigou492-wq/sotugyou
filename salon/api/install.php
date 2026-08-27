@@ -32,6 +32,20 @@ try {
         $messages[] = 'データベース ' . DB_NAME . ' を作成しました';
     }
 
+    // セットアップ済みなら何もしない
+    // （公開サーバーで誰でも実行できると攻撃の足がかりになるため）
+    try {
+        $st = $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'admin'");
+        if ((int)$st->fetchColumn() > 0) {
+            header('Content-Type: text/html; charset=utf-8');
+            echo '<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8">',
+                 '<title>セットアップ済み</title></head><body style="font-family:sans-serif;max-width:640px;margin:60px auto;">',
+                 '<h1>セットアップ済みです</h1><p>このシステムは既にセットアップが完了しています。</p>',
+                 '<p><a href="../index.html">アプリを開く</a></p></body></html>';
+            exit;
+        }
+    } catch (PDOException $e) { /* テーブル未作成＝未セットアップなので続行 */ }
+
     // スキーマ（sql/setup.sql）を実行
     // CREATE DATABASE / USE は上で処理済みのためスキップする
     // （レンタルサーバーではDB作成権限がなくエラーになるため）

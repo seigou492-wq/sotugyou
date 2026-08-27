@@ -71,6 +71,13 @@ switch ($action) {
         $name = trim((string)($b['name'] ?? ''));
         if ($id === '' || $pw === '' || $name === '') fail('ID・パスワード・氏名は必須です');
         if (!preg_match('/^[0-9A-Za-z_-]{1,20}$/', $id)) fail('IDは半角英数字20文字以内で入力してください');
+        check_len($pw, 72, 'パスワード');
+        check_len($name, 50, '氏名');
+        check_len(trim((string)($b['kana'] ?? '')), 50, 'フリガナ');
+        check_len(trim((string)($b['phone'] ?? '')), 20, '電話番号');
+        check_len(trim((string)($b['email'] ?? '')), 100, 'メールアドレス');
+        check_len(trim((string)($b['note'] ?? '')), 1000, 'メモ');
+        demo_cap_rows('users', 300);
 
         $st = pdo()->prepare('SELECT COUNT(*) FROM users WHERE id = ?');
         $st->execute([$id]);
@@ -93,19 +100,27 @@ switch ($action) {
         $id   = (string)($b['id'] ?? '');
         $name = trim((string)($b['name'] ?? ''));
         if ($name === '') fail('氏名は必須です');
+        check_len($name, 50, '氏名');
+        $kana  = trim((string)($b['kana'] ?? ''));
+        $phone = trim((string)($b['phone'] ?? ''));
+        $email = trim((string)($b['email'] ?? ''));
+        $note  = trim((string)($b['note'] ?? ''));
+        check_len($kana, 50, 'フリガナ');
+        check_len($phone, 20, '電話番号');
+        check_len($email, 100, 'メールアドレス');
+        check_len($note, 1000, 'メモ');
 
         $st = pdo()->prepare("SELECT COUNT(*) FROM users WHERE id = ? AND role = 'customer'");
         $st->execute([$id]);
         if ((int)$st->fetchColumn() === 0) fail('顧客が見つかりません', 404);
 
         $sql    = 'UPDATE users SET name = ?, kana = ?, phone = ?, email = ?, note = ?';
-        $params = [$name,
-                   trim((string)($b['kana'] ?? '')),
-                   trim((string)($b['phone'] ?? '')),
-                   trim((string)($b['email'] ?? '')),
-                   trim((string)($b['note'] ?? ''))];
+        $params = [$name, $kana, $phone, $email, $note];
         $pw = (string)($b['password'] ?? '');
         if ($pw !== '') {                     // 空欄なら現在のパスワードを維持
+            // 公開デモ用アカウントのパスワード変更は禁止（全員がログイン不能になるため）
+            demo_guard_user($id, 'デモ用アカウントのパスワードは変更できません');
+            check_len($pw, 72, 'パスワード');
             $sql .= ', password_hash = ?';
             $params[] = password_hash($pw, PASSWORD_DEFAULT);
         }
@@ -117,6 +132,7 @@ switch ($action) {
 
     case 'delete': {
         $id = (string)($b['id'] ?? '');
+        demo_guard_user($id, 'デモ用アカウントは削除できません');
         $st = pdo()->prepare("SELECT COUNT(*) FROM users WHERE id = ? AND role = 'customer'");
         $st->execute([$id]);
         if ((int)$st->fetchColumn() === 0) fail('顧客が見つかりません', 404);
